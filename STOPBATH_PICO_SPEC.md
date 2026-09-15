@@ -779,6 +779,31 @@ stands, whether Key1 gains a long press meaning, or whether the appliance
 offers a relative page event in a protocol version 2. Blocks nothing before
 `KE6`. Decided with the field evidence, in both repositories.
 
+Direction given by the author on 2026-09-15, after the `KE6` gate: the
+mapping stands for this board, and the answer is more controls rather than
+a protocol change. The module's two on board keys are hard to use, so the
+next hardware step is proper buttons (arcade style if the space can be
+justified): a toggle switch for the session (up brings the guest network
+up, down ends it) and dedicated buttons for the two screens. That removes
+the Key1 choice entirely, since a left and a right button send `LEFT_SHORT`
+and `RIGHT_SHORT` as the Flipper does, and it replaces the long press guard
+with the physical deliberateness of a switch, which is a decision for the
+appliance's guard (extension 2.2, `PD5`) when it comes, not for this
+repository. It is a new phase with its own plan, not part of `KE6`.
+
+Also noted by the author, 2026-09-15, as a later decision of theirs: the
+protocol's event set (`CENTER_SHORT`, `CENTER_LONG`, `LEFT_SHORT`,
+`RIGHT_SHORT`) was drafted around the Flipper's buttons, and a switch and
+dedicated buttons may be better served by a protocol version 2 whose events
+name the act (`SESSION_START`, `SESSION_END`, and the two pages) rather than
+a Flipper key. That is a change to the seam and belongs to the StopBath
+repository (extension 4.1; version policy in `docs/peripheral/PROTOCOL.md`).
+One thing to weigh when it comes: an event named `SESSION_START` carries its
+meaning on the peripheral, where the present design keeps meaning on the
+appliance (Flipper 2.1, the interpretation table of extension 2.1). Whether
+that boundary should move with the hardware is exactly the decision, and it
+is not made here.
+
 `KD10` **Wireless transport.** Part 9. Blocks nothing in this document's
 phases. Decided in the StopBath repository.
 
