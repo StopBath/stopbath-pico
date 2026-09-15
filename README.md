@@ -22,10 +22,11 @@ the V2 panel driver, both keys, short and long). `KE2` (layouts and the
 refresh policy) is done and its gate cleared the same day: every state
 judged on the panel, partial refresh about 480 ms with the code still, full
 about 1580 ms, no residue. `KE3` (protocol library, session, development
-peer) is done. `KE4` (the USB transport) is done on the automated side:
-`dist/stopbath_pico.uf2` is the remote itself, speaking protocol version 1
-over USB CDC; its hardware gate, twenty cable pulls against the development
-peer, is outstanding. Nothing in this repository claims a hardware gate
+peer) is done. `KE4` (the USB transport) is done and its gate cleared on the appliance's
+own Pi: `dist/stopbath_pico.uf2` is the remote, speaking protocol version 1
+over USB CDC, proven against the development peer through twenty three
+cable pulls. `KE5` (the QR code) is next; until then the code region shows
+a frame and the payload's length, not a code. Nothing in this repository claims a hardware gate
 has passed except where that document records the author saying so.
 
 The Wi-Fi radio is unused. A network transport is a later phase (spec Part 9).

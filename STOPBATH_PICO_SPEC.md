@@ -815,9 +815,9 @@ on it.
 | Partial refresh time and residue | about 480 ms, no residue at 24, measured 2026-09-15 | measured |
 | Partials before a forced full refresh | 100; no residue seen at 4 or at 24 (2026-09-15), the manufacturer's 5 discarded | field use, next measurement at 100 |
 | QR version, error correction, module size | version 3, low, 8 px per module | 4.4, `KE5` gate |
-| USB vendor and product | 2E8A and 0009, chosen in `KE4` per Raspberry Pi's guidance, with product string `StopBath Pico Remote` | 4.2, observed at the `KE4` gate |
-| USB serial string stability | believed stable (flash unique id), unobserved | 4.2, `KE4` gate |
-| Line ending translation in `stdio_usb` | believed on by default, unverified | 4.1, `KE4` |
+| USB vendor and product | 2E8A and 0009, product string `StopBath Pico Remote`, observed on the Pi 2026-09-15 | measured |
+| USB serial string stability | `525541546A1CAF09` across 23 reinsertions and a reboot, 2026-09-15 | measured |
+| Line ending translation in `stdio_usb` | on by default, confirmed from source 2026-09-15; no stdio is linked | measured |
 | Total draw beside the radio adapter | unmeasured | 4.5, `KE4` gate |
 
 # Appendix B: Required repository documents

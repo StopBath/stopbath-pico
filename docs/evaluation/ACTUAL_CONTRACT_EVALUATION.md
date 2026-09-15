@@ -173,12 +173,77 @@ author; everything else is documentation.
   the product name is not cut. Raspberry Pi's `usb-pid` repository (read
   2026-09-15) lists `0x0009` as "Raspberry Pi Pico SDK CDC UART" and says a
   standard interface device needs no separate product id and can be
-  identified by its product string, which is what is done. Whether the
-  unique board id serial string is identical across reboots and
-  re-enumerations is believed but unobserved. What Linux `cdc_acm` shows as
-  `bInterfaceNumber` for the tty is unobserved.
-- Experiment, `KE4` gate: `lsusb -v` and `udevadm info -a` on the appliance
-  with the Pico attached, twice, across a reboot of each side.
+  identified by its product string, which is what is done. The serial
+  string was observed identical across twenty three reinsertions and a
+  reboot of the Pi (below), and `cdc_acm` reports `bInterfaceNumber` `00`
+  for the tty's interface parent (below).
+- OBSERVED by the author, 2026-09-15, on the appliance (`dmesg` on the Pi,
+  hostname `Stopbath`, the same USB port the Flipper had used):
+
+```text
+usb 3-2: new full-speed USB device number 43 using xhci-hcd
+usb 3-2: New USB device found, idVendor=2e8a, idProduct=0009, bcdDevice= 1.00
+usb 3-2: New USB device strings: Mfr=1, Product=2, SerialNumber=3
+usb 3-2: Product: StopBath Pico Remote
+usb 3-2: Manufacturer: Raspberry Pi
+usb 3-2: SerialNumber: 525541546A1CAF09
+cdc_acm 3-2:1.0: ttyACM0: USB ACM device
+```
+
+  So: vendor `2e8a`, product `0009`, the product string as set, the serial
+  string sixteen upper case hex digits (the flash unique id), full speed,
+  and `cdc_acm` hanging the one tty off interface `1.0`, whose control
+  interface is number `00`. This is the row the appliance's device profile
+  needs (the StopBath repository's `docs/PICO_REMOTE_HANDOFF.md` 1.1).
+- OBSERVED by the author, 2026-09-15, with the development peer on the Pi
+  (`build/host/development_peer /dev/ttyACM0`): the peer drove `guest wifi`,
+  `presenting wifi`, `deliver 3` and `guest guest` ("all paths exercised"),
+  then the cable was pulled and reinserted twenty three times; the peer
+  reported "device gone" and "peripheral back on /dev/ttyACM0" for every
+  one, with no repair step on either side. Twice, immediately after a
+  reinsertion, the peer printed "cannot open /dev/ttyACM0: Permission
+  denied" and then succeeded on its next retry: the new node exists as
+  root only for the moments before udev applies the `dialout` group, and
+  the peer's retry landed inside that window. A property of the Pi's udev
+  timing and the peer's retry, not of the remote; the appliance opens the
+  udev rule's symlink after udev has run, so it does not see this.
+- OBSERVED by the author, 2026-09-15, `udevadm info -a /dev/ttyACM0` on the
+  Pi (a Pi 5: the controller is `xhci-hcd.1` on `1f00300000.usb` under the
+  RP1 PCIe bridge):
+
+```text
+looking at device '.../usb3/3-2/3-2:1.0/tty/ttyACM0':
+looking at parent device '.../usb3/3-2/3-2:1.0':
+    ATTRS{bInterfaceNumber}=="00"
+looking at parent device '.../usb3/3-2':
+    ATTRS{idProduct}=="0009"
+    ATTRS{idVendor}=="2e8a"
+    ATTRS{serial}=="525541546A1CAF09"
+```
+
+  The rule for this remote is therefore the Flipper's two rule shape with
+  the interface number `00` in place of `02`: the first rule marks a tty
+  whose USB device parent has vendor `2e8a`, product `0009` and this
+  serial; the second picks the marked tty whose interface parent reports
+  `bInterfaceNumber` `00`. Handed to the appliance team's device profile.
+- OBSERVED by the author, 2026-09-15, the peer's `log` after a peer restart
+  and a run of presses: `received: 1 hello, 8 button, 0 state, 0 refused`,
+  the HELLO with the token and `locked=0`, then `CENTER_SHORT`,
+  `CENTER_LONG` and `RIGHT_SHORT` lines, every one with `foregrounded=1
+  unlocked=1` and none refused. `LEFT_SHORT` (Key1 on the gallery page) was
+  not in this run because the peer was not showing the gallery page at the
+  time; it is checked separately.
+- OBSERVED by the author, 2026-09-15, after `guest guest` at the peer: Key1
+  produced `BUTTON event=LEFT_SHORT foregrounded=1 unlocked=1`, repeatedly,
+  and on the Wi-Fi page `RIGHT_SHORT`; `received: 1 hello, 26 button, 0
+  state, 0 refused` over the run. The Key1 choice of spec 2.3 is therefore
+  observed on the wire in both directions.
+- OBSERVED by the author, 2026-09-15, after `sudo reboot` of the Pi with
+  the Pico attached: `[    0.900606] usb 3-2: SerialNumber: 525541546A1CAF09`,
+  the same string, enumerated under a second into boot. Across the earlier
+  twenty three reinsertions the peer found the device on the same node each
+  time. The serial string is stable and the udev rule may match on it.
+  Nothing further is owed for `KE4`.
 - Conclusion so far: a Pico 2 W presents vendor `2E8A`, product `0009`, one
   CDC channel, and therefore one `ttyACM` node. This is what
   the StopBath repository's `docs/PICO_REMOTE_HANDOFF.md` asks the appliance's device rule to match.
