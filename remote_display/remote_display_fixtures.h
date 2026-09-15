@@ -26,9 +26,10 @@ typedef struct {
 #define REMOTE_DISPLAY_FIXTURE_UNKNOWN_STATUS (RemoteDisplayStatusCount + 3)
 
 /* Fixture text, not wire values. The Wi-Fi payload is 53 bytes, the length
- * the appliance's real payload measured on the Flipper, so the code region
- * shows the figure that matters. */
-#define REMOTE_DISPLAY_FIXTURE_WIFI_PAYLOAD "WIFI:T:WPA;S:StopBath-fixture;P:fixture-passphrase-1;;"
+ * the appliance's real payload measured on the Flipper and the most a
+ * version 3 code holds at the lowest error correction, so the code drawn is
+ * the size that matters. (It was 54 until the KE5 encoder said so.) */
+#define REMOTE_DISPLAY_FIXTURE_WIFI_PAYLOAD "WIFI:T:WPA;S:StopBath-fixture;P:fixture-passphrase1;;"
 #define REMOTE_DISPLAY_FIXTURE_GUEST_PAYLOAD "HTTP://192.168.72.1/"
 /* Longer than the eleven cells the band holds, so truncation is visible. */
 #define REMOTE_DISPLAY_FIXTURE_ERROR_CODE "ERROR_FIXTURE"

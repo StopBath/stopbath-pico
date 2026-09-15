@@ -17,7 +17,8 @@ PYTHON ?= python3
 BASE_WARNINGS := -std=gnu2x -Wall -Wextra -Werror -Wstrict-prototypes -Wredundant-decls \
                  -Wdouble-promotion -Wundef
 HOST_WARNINGS := $(BASE_WARNINGS) -Wshadow -Wconversion
-HOST_CFLAGS := $(HOST_WARNINGS) -O1 -g
+HOST_CFLAGS := $(HOST_WARNINGS) -O1 -g -Ilib/qrcodegen
+VENDORED_CFLAGS := $(BASE_WARNINGS) -O1 -g
 SANITISER_CFLAGS := -fsanitize=address,undefined -fno-omit-frame-pointer -fno-sanitize-recover=all
 # Heap functions are wrapped in every test binary so a test can prove that
 # the code under it did not allocate (Flipper 0.10). The wrappers live in
@@ -38,8 +39,15 @@ PURE_LOGIC_SOURCES := remote_input/remote_input_model.c \
                       protocol/remote_protocol.c \
                       peer/development_peer_core.c \
                       session/remote_session.c \
-                      transport/remote_link_edge.c
-PURE_LOGIC_HEADERS := $(wildcard remote_input/*.h remote_display/*.h protocol/*.h peer/*.h session/*.h transport/*.h)
+                      transport/remote_link_edge.c \
+                      remote_display/remote_qr.c
+PURE_LOGIC_HEADERS := $(wildcard remote_input/*.h remote_display/*.h protocol/*.h peer/*.h session/*.h transport/*.h lib/qrcodegen/*.h)
+
+# The vendored encoder is compiled once per warning set, held to the base
+# set as on the device (lib/qrcodegen/PROVENANCE.md).
+VENDORED_SOURCES := lib/qrcodegen/qrcodegen.c
+VENDORED_OBJECT := $(BUILD_DIR)/vendored_qrcodegen.o
+VENDORED_SANITISED_OBJECT := $(BUILD_DIR)/vendored_qrcodegen_sanitised.o
 
 # The fuzz driver: the protocol library plus the harness, run for a fixed
 # number of deterministic inputs. FUZZ_ITERATIONS sets how many.
@@ -65,13 +73,21 @@ test: $(TEST_BINARIES)
 test-sanitise: $(SANITISED_TEST_BINARIES)
 	@for suite in $(SANITISED_TEST_BINARIES); do echo "== $$suite"; $$suite || exit 1; done
 
-$(BUILD_DIR)/%: tests/%.c $(PURE_LOGIC_SOURCES) $(PURE_LOGIC_HEADERS) $(TEST_HEADERS)
+$(VENDORED_OBJECT): $(VENDORED_SOURCES) $(PURE_LOGIC_HEADERS)
 	@mkdir -p $(BUILD_DIR)
-	$(CC) $(HOST_CFLAGS) -o $@ $< $(PURE_LOGIC_SOURCES) $(ALLOCATION_WRAP_LDFLAGS)
+	$(CC) $(VENDORED_CFLAGS) -c -o $@ $(VENDORED_SOURCES)
 
-$(BUILD_DIR)/%_sanitised: tests/%.c $(PURE_LOGIC_SOURCES) $(PURE_LOGIC_HEADERS) $(TEST_HEADERS)
+$(VENDORED_SANITISED_OBJECT): $(VENDORED_SOURCES) $(PURE_LOGIC_HEADERS)
 	@mkdir -p $(BUILD_DIR)
-	$(CC) $(HOST_CFLAGS) $(SANITISER_CFLAGS) -o $@ $< $(PURE_LOGIC_SOURCES) $(ALLOCATION_WRAP_LDFLAGS)
+	$(CC) $(VENDORED_CFLAGS) $(SANITISER_CFLAGS) -c -o $@ $(VENDORED_SOURCES)
+
+$(BUILD_DIR)/%: tests/%.c $(PURE_LOGIC_SOURCES) $(PURE_LOGIC_HEADERS) $(TEST_HEADERS) $(VENDORED_OBJECT)
+	@mkdir -p $(BUILD_DIR)
+	$(CC) $(HOST_CFLAGS) -o $@ $< $(PURE_LOGIC_SOURCES) $(VENDORED_OBJECT) $(ALLOCATION_WRAP_LDFLAGS)
+
+$(BUILD_DIR)/%_sanitised: tests/%.c $(PURE_LOGIC_SOURCES) $(PURE_LOGIC_HEADERS) $(TEST_HEADERS) $(VENDORED_SANITISED_OBJECT)
+	@mkdir -p $(BUILD_DIR)
+	$(CC) $(HOST_CFLAGS) $(SANITISER_CFLAGS) -o $@ $< $(PURE_LOGIC_SOURCES) $(VENDORED_SANITISED_OBJECT) $(ALLOCATION_WRAP_LDFLAGS)
 
 fuzz: $(BUILD_DIR)/fuzz_remote_protocol
 	$(BUILD_DIR)/fuzz_remote_protocol $(FUZZ_ITERATIONS)

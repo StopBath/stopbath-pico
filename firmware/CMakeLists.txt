@@ -34,7 +34,8 @@ set(SHARED_SOURCES
     ${REPOSITORY_ROOT}/remote_display/remote_font.c
     ${REPOSITORY_ROOT}/remote_display/remote_display_layout.c
     ${REPOSITORY_ROOT}/remote_display/remote_display_fixtures.c
-    ${REPOSITORY_ROOT}/remote_display/remote_refresh_policy.c)
+    ${REPOSITORY_ROOT}/remote_display/remote_refresh_policy.c
+    ${REPOSITORY_ROOT}/remote_display/remote_qr.c)
 
 # The link: the protocol library, the session, the transport's decision
 # table, and the two SDK facing files. Only the remote links these.
@@ -46,18 +47,19 @@ set(LINK_SOURCES
     ${REPOSITORY_ROOT}/session/remote_session.c
     ${REPOSITORY_ROOT}/transport/remote_link_edge.c)
 
-set(VENDORED_DRIVER ${REPOSITORY_ROOT}/lib/waveshare/EPD_4in2_V2.c)
+set(VENDORED_SOURCES ${REPOSITORY_ROOT}/lib/waveshare/EPD_4in2_V2.c ${REPOSITORY_ROOT}/lib/qrcodegen/qrcodegen.c)
 
 # One image per program. All bind the EPD_4in2_V2 driver, the one the
 # author observed lighting the panel on 2026-09-15 (evaluation log 4.3).
 function(add_firmware_image target_name program_source)
-    add_executable(${target_name} ${program_source} ${SHARED_SOURCES} ${ARGN} ${VENDORED_DRIVER})
+    add_executable(${target_name} ${program_source} ${SHARED_SOURCES} ${ARGN} ${VENDORED_SOURCES})
     target_include_directories(${target_name} PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
-        ${REPOSITORY_ROOT}/lib/waveshare)
+        ${REPOSITORY_ROOT}/lib/waveshare
+        ${REPOSITORY_ROOT}/lib/qrcodegen)
     target_link_libraries(${target_name} PRIVATE pico_stdlib hardware_spi hardware_gpio hardware_timer)
     set_source_files_properties(${program_source} ${SHARED_SOURCES} ${ARGN} PROPERTIES COMPILE_OPTIONS "${PROJECT_WARNINGS}")
-    set_source_files_properties(${VENDORED_DRIVER} PROPERTIES COMPILE_OPTIONS "${VENDORED_WARNINGS}")
+    set_source_files_properties(${VENDORED_SOURCES} PROPERTIES COMPILE_OPTIONS "${VENDORED_WARNINGS}")
     # No stdio of any kind: the SDK's USB stdio would translate line endings
     # on the channel the protocol uses (evaluation log 4.1), and there is
     # nothing to print.

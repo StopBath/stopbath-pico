@@ -25,8 +25,11 @@ about 1580 ms, no residue. `KE3` (protocol library, session, development
 peer) is done. `KE4` (the USB transport) is done and its gate cleared on the appliance's
 own Pi: `dist/stopbath_pico.uf2` is the remote, speaking protocol version 1
 over USB CDC, proven against the development peer through twenty three
-cable pulls. `KE5` (the QR code) is next; until then the code region shows
-a frame and the payload's length, not a code. Nothing in this repository claims a hardware gate
+cable pulls. `KE5` (the QR code) is done and its gate cleared: the code region draws a
+real code, version 3 at 7 pixels a module for the appliance's Wi-Fi payload,
+proven against an independent encoder's matrices and scanned from arm's
+length on several phones. `KE6`, the first session against the real
+appliance, waits on the appliance's device profile for this remote. Nothing in this repository claims a hardware gate
 has passed except where that document records the author saying so.
 
 The Wi-Fi radio is unused. A network transport is a later phase (spec Part 9).
@@ -118,6 +121,7 @@ make check-typography PYTHON="py -3"
 | `peer/` | the development peer, copied from the Flipper repository with provenance: a host stand-in for the appliance |
 | `fuzz/` | the protocol parser fuzz harness |
 | `lib/waveshare/` | the vendored panel driver, unmodified, with provenance |
+| `lib/qrcodegen/` | the vendored QR encoder, unmodified, with provenance |
 | `tests/` | host tests and the shared harness |
 | `scripts/` | the typography scan, the toolchain setup and firmware build scripts, the version pin |
 | `docs/evaluation/` | the Plan stage evidence log |

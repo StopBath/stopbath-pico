@@ -487,10 +487,47 @@ void EPD_4IN2_Sleep(void);
 
 ## 4.4 QR
 
-Not yet worked. The Flipper repository's published vectors
-(`tests/qr_published_vectors.h`) and its vendored `lib/qrcodegen` at its recorded
-commit and digest are the starting point; they are copied with provenance in
-`KE5`. Encode and render time and scan reliability are measured on the device.
+### Encoder
+
+- Source: the `stopbath-flipper` repository's `lib/qrcodegen/` at commit
+  `3677e61904d854504ac58c5dce6d6e6419836cfc`, itself Project Nayuki's
+  QR Code generator at tag `v1.8.0`, commit
+  `720f62bddb7226106071d4728c292cb1df519ceb`; that repository's evaluation
+  log carries the Flipper 0.12 dependency record (no heap allocation, MIT,
+  refuses rather than overruns, sanitised on every test run), made
+  2026-09-11 and not repeated here.
+- Copied: 2026-09-15, byte for byte, digests in `lib/qrcodegen/PROVENANCE.md`.
+  The published vector cross check (matrices reproduced by libqrencode, an
+  independent encoder) came with it: `tests/qr_published_vectors.h` and
+  `tests/test_remote_qr_vectors.c`, and every vector reproduces here.
+
+### Sizing on this panel
+
+- Derived, 2026-09-15, from the code square (259 pixels,
+  `REMOTE_LAYOUT_CODE_SIDE`) and the standard's four module quiet zone: the
+  module is the largest whole pixel size at which symbol plus quiet zone
+  fits, so version 1 draws at 8 pixels a module, versions 2 and 3 at 7
+  (version 3 is exactly 37 by 7, 259), version 4 at 6, version 9 at 4.
+  The ceiling is version 9, the last at which the module holds the four
+  pixel minimum (about 0.85 mm at 0.212 mm a pixel); version 10 would fall
+  to 3. The minimum is a starting point for the `KE5` gate.
+- OBSERVED against the encoder, 2026-09-15, by a probe on the host: the
+  ceiling holds 230 bytes of lowercase text (byte mode, lowest error
+  correction); 231 is refused. An earlier belief that the protocol's 256
+  byte payload bound fits was wrong and is discarded: a payload of 231 to
+  256 bytes is shown as too big rather than drawn, and no Wi-Fi payload the
+  standard grammar can produce approaches it (about 120 at most).
+- OBSERVED against the encoder, 2026-09-15: the KE2 fixture Wi-Fi payload
+  was 54 bytes, one over what version 3 holds, and encoded at version 4;
+  corrected to 53 so the fixture draws at the real payload's size.
+- OBSERVED by the author, 2026-09-15: "both codes scanned fine from arm's
+  length on a few phones", the Wi-Fi code at version 3, 7 pixels a module,
+  and the gallery code at version 1, 8 pixels, from the layout demo. Neither
+  the handsets nor the first scan distance was recorded. The 4 pixel minimum
+  module size, which sets the ceiling, remains a starting point: no code at
+  that size has yet been scanned, and none the appliance sends needs it.
+- Not yet measured: encode and draw time on the device; the layout demo's
+  refresh figure includes them and was not seen to change.
 
 ---
 

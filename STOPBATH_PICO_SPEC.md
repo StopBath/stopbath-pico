@@ -814,7 +814,7 @@ on it.
 | Full refresh time | about 1580 ms, measured 2026-09-15 (the manufacturer's 4 s was not this panel's) | measured |
 | Partial refresh time and residue | about 480 ms, no residue at 24, measured 2026-09-15 | measured |
 | Partials before a forced full refresh | 100; no residue seen at 4 or at 24 (2026-09-15), the manufacturer's 5 discarded | field use, next measurement at 100 |
-| QR version, error correction, module size | version 3, low, 8 px per module | 4.4, `KE5` gate |
+| QR version, error correction, module size | the smallest version that holds the payload, error correction raised where free, the largest whole pixel size that fits with a four module quiet zone (version 3 at 7 px, version 1 at 8 px); ceiling version 9 at the 4 px minimum | 4.4 derived 2026-09-15; the minimum settled by scanning at the `KE5` gate |
 | USB vendor and product | 2E8A and 0009, product string `StopBath Pico Remote`, observed on the Pi 2026-09-15 | measured |
 | USB serial string stability | `525541546A1CAF09` across 23 reinsertions and a reboot, 2026-09-15 | measured |
 | Line ending translation in `stdio_usb` | on by default, confirmed from source 2026-09-15; no stdio is linked | measured |

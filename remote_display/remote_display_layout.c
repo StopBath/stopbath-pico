@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "remote_font.h"
+#include "remote_qr.h"
 
 /* The KD8 proposal. The column beside the code is 136 pixels, eleven cells
  * at scale two, which is why every hint line below is at most eleven
@@ -127,43 +128,30 @@ static void render_header(const RemoteDisplayState* display_state, RemoteBitmap*
     remote_font_draw_text(bitmap, REMOTE_BITMAP_WIDTH - MARGIN - width, MARGIN, label, TITLE_SCALE, RemoteBitmapBlack);
 }
 
-/* KE2 draws the code's extent and its page name where KE5 will put the
- * matrix, so the gate judges the geometry before the encoder exists. */
+/* The code, centred in its square. A payload the encoder refuses (empty, or
+ * beyond the ceiling in remote_qr.h) shows a distinct message in the square
+ * instead, never a truncated or unscannable code (spec 2.7). */
 static void render_code(const RemoteDisplayState* display_state, RemoteBitmap* bitmap) {
     if(!page_shows_a_code(display_state->page)) {
         return;
     }
     RemoteLayoutRectangle area = regions[RemoteLayoutRegionCode];
     int inset = (area.width - REMOTE_LAYOUT_CODE_SIDE) / 2;
-    int left = area.x + inset;
-    int top = area.y + inset;
-    const int border = 3;
-    remote_bitmap_fill_rectangle(bitmap, left, top, REMOTE_LAYOUT_CODE_SIDE, border, RemoteBitmapBlack);
-    remote_bitmap_fill_rectangle(bitmap, left, top + REMOTE_LAYOUT_CODE_SIDE - border, REMOTE_LAYOUT_CODE_SIDE, border, RemoteBitmapBlack);
-    remote_bitmap_fill_rectangle(bitmap, left, top, border, REMOTE_LAYOUT_CODE_SIDE, RemoteBitmapBlack);
-    remote_bitmap_fill_rectangle(bitmap, left + REMOTE_LAYOUT_CODE_SIDE - border, top, border, REMOTE_LAYOUT_CODE_SIDE, RemoteBitmapBlack);
+    RemoteLayoutRectangle square = {area.x + inset, area.y + inset, REMOTE_LAYOUT_CODE_SIDE, REMOTE_LAYOUT_CODE_SIDE};
 
-    const char* name = display_state->page == RemoteDisplayPageWifi ? "WIFI CODE" : "GALLERY CODE";
-    int name_scale = 3;
-    int name_width = remote_font_text_width(name, name_scale);
-    int centre_y = top + REMOTE_LAYOUT_CODE_SIDE / 2;
-    remote_font_draw_text(bitmap, left + (REMOTE_LAYOUT_CODE_SIDE - name_width) / 2, centre_y - 30, name, name_scale, RemoteBitmapBlack);
-
-    /* The payload's length is the one thing about it worth seeing before
-     * the encoder exists: it is what decides the code's version. */
-    char length_text[LABEL_CAPACITY] = "";
-    write_unsigned(length_text, sizeof(length_text), (unsigned int)strlen(display_state->payload));
-    char line[LABEL_CAPACITY];
-    cut_to_cells(line, sizeof(line), length_text, 5);
-    size_t used = strlen(line);
-    const char* suffix = " BYTES";
-    size_t suffix_index = 0;
-    while(suffix[suffix_index] != '\0' && used + 1 < sizeof(line)) {
-        line[used++] = suffix[suffix_index++];
+    /* The matrix is a few hundred bytes and lives here for the call; nothing
+     * allocates. */
+    RemoteQrMatrix matrix;
+    if(remote_qr_encode(display_state->payload, &matrix)) {
+        remote_qr_draw(&matrix, bitmap, square);
+        return;
     }
-    line[used] = '\0';
-    int line_width = remote_font_text_width(line, COLUMN_SCALE);
-    remote_font_draw_text(bitmap, left + (REMOTE_LAYOUT_CODE_SIDE - line_width) / 2, centre_y + 10, line, COLUMN_SCALE, RemoteBitmapBlack);
+    const char* first = "CODE TOO BIG";
+    const char* second = "TO SHOW HERE";
+    int scale = 3;
+    int centre_y = square.y + square.height / 2;
+    remote_font_draw_text(bitmap, square.x + (square.width - remote_font_text_width(first, scale)) / 2, centre_y - 30, first, scale, RemoteBitmapBlack);
+    remote_font_draw_text(bitmap, square.x + (square.width - remote_font_text_width(second, scale)) / 2, centre_y + 6, second, scale, RemoteBitmapBlack);
 }
 
 static void render_page(const RemoteDisplayState* display_state, RemoteBitmap* bitmap) {

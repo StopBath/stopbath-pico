@@ -18,6 +18,8 @@ unstated.
 | `tests/test_development_peer.c` (KE3, copied from the Flipper repository) | host, any `gcc` | `make test` |
 | `tests/test_remote_session.c` (KE3) | host, any `gcc` | `make test` |
 | `tests/test_remote_link_edge.c` (KE4) | host, any `gcc` | `make test` |
+| `tests/test_remote_qr.c` (KE5) | host, any `gcc` | `make test` |
+| `tests/test_remote_qr_vectors.c` (KE5, copied from the Flipper repository; matrices against an independent encoder) | host, any `gcc` | `make test` |
 | protocol parser fuzz harness (KE3) | host, deterministic; sanitised on Linux | `make fuzz`, `make fuzz-sanitise` |
 | generated tables match `protocol.json` (KE3) | any Python 3 | `make check-protocol-tables` |
 | `protocol.json` is the appliance's frozen definition (KE3) | any Python 3 | `make check-protocol-definition` |
@@ -92,6 +94,18 @@ and seen to fail before the module existed. The SDK facing edge
 (`firmware/usb_link.c`) is not testable off the device and is the `KE4`
 hardware gate.
 
+`KE5`: the real Wi-Fi payload length is version three and the gallery
+address version one, with the finder pattern where it belongs; the module is
+the largest whole pixel size that fits with the quiet zone, for every
+version from one to the ceiling, and the ceiling is where the minimum size
+would be lost; a drawn code is centred with a light quiet zone and no dark
+pixel outside the symbol; an empty or oversized payload is refused whole,
+the ceiling's capacity is 230 bytes and 231 is refused; the layout's code
+region is pixel for pixel the wrapper's drawing, and an unencodable payload
+shows a distinct message; nothing allocates. In `tests/test_remote_qr.c`,
+written and seen to fail before the wrapper existed. And every published
+vector reproduces module for module (`tests/test_remote_qr_vectors.c`).
+
 ## Testing deviations
 
 Hardware specific behaviour that cannot reasonably be automated, with the
@@ -106,6 +120,7 @@ reason (Flipper Part 6):
 | Partial refresh leaves the code region undisturbed on the glass and how much residue it leaves | needs the panel; the bitmap side is proven on the host | `KE2` gate |
 | Full and partial refresh durations | needs the panel; the demo measures and shows them | `KE2` gate |
 | The USB link opens on DTR, closes on a cable pull, and recovers | needs the device and a host; the decision table is proven on the host, TinyUSB's reporting of the facts is not | `KE4` gate |
+| A drawn code scans, from real phones at arm's length | a rendered code is not a scanned code (Flipper 2.7); the matrix is proven, the glass and the phone are not | `KE5` gate |
 
 ## Hardware gates
 
