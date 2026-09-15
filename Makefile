@@ -30,7 +30,10 @@ BUILD_DIR := build/host
 # the only change needed for the tests to see it.
 PURE_LOGIC_SOURCES := remote_input/remote_input_model.c \
                       remote_display/remote_bitmap.c \
-                      remote_display/remote_font.c
+                      remote_display/remote_font.c \
+                      remote_display/remote_display_layout.c \
+                      remote_display/remote_display_fixtures.c \
+                      remote_display/remote_refresh_policy.c
 PURE_LOGIC_HEADERS := $(wildcard remote_input/*.h remote_display/*.h)
 
 # One binary per suite, named after its source.

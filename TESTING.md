@@ -12,6 +12,8 @@ unstated.
 |---|---|---|
 | `tests/test_remote_input_model.c` (KE1) | host, any `gcc` | `make test` |
 | `tests/test_remote_bitmap.c` (KE1) | host, any `gcc` | `make test` |
+| `tests/test_remote_display_layout.c` (KE2) | host, any `gcc` | `make test` |
+| `tests/test_remote_refresh_policy.c` (KE2) | host, any `gcc` | `make test` |
 | all of the above under address and undefined behaviour sanitisers | Linux or WSL | `make test-sanitise` |
 | typography scan (Flipper 0.8) | any Python 3 | `make check-typography` |
 | firmware build, warnings as errors, against the pinned SDK and compiler | host with the toolchain from `scripts/setup_toolchain.sh` | `scripts/build_firmware.sh` |
@@ -42,6 +44,19 @@ most significant bit, 1 white), row addressing, clipping of pixels and
 rectangles, and the font's cell geometry, scaling, unknown character
 handling and case folding. All in `tests/test_remote_bitmap.c`.
 
+`KE2`: every fixture renders; the regions are byte aligned, inside the
+panel and disjoint; an unknown status or page renders the fallback; long
+values are cut inside their region; each field change maps to its regions
+and the rendered pixel difference is confined to them; the code region is
+identical across every pair of fixtures sharing a page and payload; a link
+screen change reports every region; rendering never allocates. And the
+policy: no change is no refresh, a count, error or status change is partial
+and never touches the code, a page, payload or link change is full, the
+forced full arrives at the bound and any full resets it. In
+`tests/test_remote_display_layout.c` and `tests/test_remote_refresh_policy.c`,
+written and seen to fail (no rule to make the target) before the modules
+existed.
+
 ## Testing deviations
 
 Hardware specific behaviour that cannot reasonably be automated, with the
@@ -53,6 +68,8 @@ reason (Flipper Part 6):
 | Which vendored driver the panel in hand needs | needs the panel | `KE1` gate; observed 2026-09-15, V2 |
 | The keys are on GP15 and GP17 and read low when pressed | needs the board; taken from the schematic | `KE1` gate |
 | The classification thresholds feel right | a hand, not a test | `KD11`, field use |
+| Partial refresh leaves the code region undisturbed on the glass and how much residue it leaves | needs the panel; the bitmap side is proven on the host | `KE2` gate |
+| Full and partial refresh durations | needs the panel; the demo measures and shows them | `KE2` gate |
 
 ## Hardware gates
 

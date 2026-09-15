@@ -24,14 +24,16 @@ device is recorded here with the date; anything not yet measured says so.
 |---|---|---|
 | `KE1` | the first light image runs on the author's Pico 2 W, draws the pattern and legend, and reports each key press and its kind on the panel; the driver variant and the key GPIOs recorded as observed | CLEARED 2026-09-15 by the author: the V2 image drew and the V1 image did not, settling the driver variant; then "Key0 and Key1 both update on short and long", settling the key GPIOs and the classification on the device. Observed alongside, and expected of first light: a press made while the panel is refreshing is not recorded, because the program samples no key during the blocking full refresh. That is the limitation KE2's refresh policy exists to remove (spec 2.6). Not recorded: whether the panel was read in daylight, and the refresh time, which KE2 measures. |
 
+| `KE2` | each display state legible on the panel at arm's length in daylight (`KD8`); a partial refresh of the count region does not disturb the code region, observed; residue after the measured number of partials is acceptable or the forced full interval is set accordingly | NOT YET CLEARED. Flash `dist/stopbath_pico_layout_demo.uf2`. KEY1 short steps through the fixtures (a full refresh each): judge every one. On a wifi or gallery fixture, press KEY0 short several times and watch the count change while the code frame stays still; hold KEY0 to toggle the error band the same way. KEY1 long shows the diagnostic screen with the last refresh's duration in milliseconds and the running counts; read off a full refresh time and a partial refresh time. Report: legibility, whether the code frame moved during a partial, how the residue looks after five partials, and both durations. |
+
 ## Measurements owed
 
 | Measurement | Owed to | Status |
 |---|---|---|
 | which driver variant lights the panel | evaluation log 4.3 | observed 2026-09-15: V2 |
 | that the keys are on GP15 and GP17 and read low when pressed | evaluation log 4.3 | observed 2026-09-15: both keys report short and long |
-| full refresh time | evaluation log 4.3, `KE2` | manufacturer's 4 s, unmeasured |
-| partial refresh time and residue | evaluation log 4.3, `KE2` | unmeasured |
+| full refresh time | evaluation log 4.3, `KE2` | manufacturer's 4 s; the layout demo shows the measured figure |
+| partial refresh time and residue | evaluation log 4.3, `KE2` | the layout demo shows the time; residue is judged by eye |
 | firmware size against the 4 MB flash | Flipper V1 report | recorded per build in the reproduction report |
 | USB identity as Linux sees it | evaluation log 4.2, `KE4` | unobserved |
 | total draw beside the appliance's radio adapter | evaluation log 4.5, `KE4` | unmeasured |

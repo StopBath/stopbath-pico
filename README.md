@@ -19,7 +19,8 @@ owns in `docs/peripheral/`. What this project asks of the appliance is in
 scan and the firmware build run on a machine with no Pico attached, and the
 author cleared the hardware gate on 2026-09-15 (`HARDWARE_COMPATIBILITY.md`:
 the V2 panel driver, both keys, short and long). `KE2` (layouts and the
-refresh policy) is next. Nothing in this repository claims a hardware gate
+refresh policy) is done on the automated side; its hardware gate, every
+state judged on the panel and the partial refresh observed, is outstanding. Nothing in this repository claims a hardware gate
 has passed except where that document records the author saying so.
 
 The Wi-Fi radio is unused. A network transport is a later phase (spec Part 9).
@@ -52,7 +53,10 @@ scripts/setup_toolchain.sh
 scripts/build_firmware.sh
 ```
 
-The result is `dist/stopbath_pico_first_light.uf2`. To flash: hold BOOTSEL
+The result is `dist/stopbath_pico_first_light.uf2` (KE1, the panel and key
+check) and `dist/stopbath_pico_layout_demo.uf2` (KE2, every display state
+and the refresh policy; its controls are in `HARDWARE_COMPATIBILITY.md`).
+To flash: hold BOOTSEL
 on the Pico, plug it into the PC, release, and copy the `.uf2` onto the
 `RP2350` drive that appears. The Pico restarts into it. Use a micro USB cable
 that carries data; two of the author's charging cables produced no drive at
@@ -84,9 +88,9 @@ make check-typography PYTHON="py -3"
 
 | Path | Contents |
 |---|---|
-| `firmware/` | the pico-sdk facing application, kept thin: the first light program, the hardware layer the vendored driver expects, the panel binding, the build |
+| `firmware/` | the pico-sdk facing application, kept thin: the two programs, the hardware layer the vendored driver expects, the non-blocking panel driving, the build |
 | `remote_input/` | pure logic: two keys, debounce, short and long classification, no SDK |
-| `remote_display/` | pure logic: the frame buffer in the panel's packing, a bitmap font, no SDK |
+| `remote_display/` | pure logic: the frame buffer in the panel's packing, a bitmap font, the layout with its regions, the fixtures, the refresh policy, no SDK |
 | `lib/waveshare/` | the vendored panel driver, unmodified, with provenance |
 | `tests/` | host tests and the shared harness |
 | `scripts/` | the typography scan, the toolchain setup and firmware build scripts, the version pin |

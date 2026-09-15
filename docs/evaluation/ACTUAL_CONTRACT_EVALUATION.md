@@ -301,6 +301,26 @@ void EPD_4IN2_Sleep(void);
   the next person who sees "nothing happens" tries the cable before the
   board. A data capable micro USB cable is a hardware requirement.
 
+### Partial refresh, from the driver source
+
+- Source: `lib/waveshare/EPD_4in2_V2.c` at the vendored commit, lines 501
+  to 557 (`EPD_4IN2_V2_PartialDisplay`) and 144 to 149
+  (`EPD_4IN2_V2_TurnOnDisplay_Partial`), read 2026-09-15.
+- Observed: the partial sequence writes border waveform `0x3C 0x80` and
+  update control `0x21 0x00 0x00`, sets the RAM window (`0x44`, `0x45`) and
+  cursor (`0x4E`, `0x4F`) in byte columns and pixel rows, streams the
+  rectangle into RAM plane `0x24` only, then updates with `0x22 0xFF`,
+  `0x20`. The full sequence (`Display`, lines 356 to 380) streams the whole
+  frame into both `0x24` and `0x26` and updates with `0x22 0xF7`. `Init`
+  (lines 225 to 250) sets `0x21 0x40 0x00` and `0x3C 0x05`, which the
+  partial pass overwrites. A fast full mode exists (`Init_Fast`, `0x1A`
+  temperature override, `0x22 0xC7`), unmeasured and unused.
+- Conclusion: regions must start on a byte column and span whole bytes,
+  which the layout enforces and a test holds. `firmware/panel.c` restores
+  the two registers before a full refresh rather than resetting; whether
+  that is enough is a `KE2` gate observation. Nothing about durations or
+  residue is known until measured.
+
 ### Schematic
 
 - Source: https://files.waveshare.com/upload/2/20/Pico-ePaper-4.2.pdf, linked

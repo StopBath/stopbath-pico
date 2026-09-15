@@ -22,24 +22,31 @@ set(BASE_WARNINGS -Wall -Wextra -Werror -Wstrict-prototypes -Wredundant-decls -W
 set(PROJECT_WARNINGS ${BASE_WARNINGS} -Wshadow -Wconversion)
 set(VENDORED_WARNINGS ${BASE_WARNINGS})
 
-set(PROJECT_SOURCES
-    first_light.c
+# Sources every image shares: the hardware layer, the panel driving, and the
+# pure logic modules.
+set(SHARED_SOURCES
     DEV_Config.c
+    panel.c
     ${REPOSITORY_ROOT}/remote_input/remote_input_model.c
     ${REPOSITORY_ROOT}/remote_display/remote_bitmap.c
-    ${REPOSITORY_ROOT}/remote_display/remote_font.c)
+    ${REPOSITORY_ROOT}/remote_display/remote_font.c
+    ${REPOSITORY_ROOT}/remote_display/remote_display_layout.c
+    ${REPOSITORY_ROOT}/remote_display/remote_display_fixtures.c
+    ${REPOSITORY_ROOT}/remote_display/remote_refresh_policy.c)
 
-# The first light image. Two were built, one per vendored driver, until the
-# author observed on 2026-09-15 that the V2 driver lights the panel and the
-# V1 does not (evaluation log 4.3); the V1 driver and its image were removed.
-function(add_first_light_image target_name panel_binding vendored_driver)
-    add_executable(${target_name} ${PROJECT_SOURCES} ${panel_binding} ${vendored_driver})
+set(VENDORED_DRIVER ${REPOSITORY_ROOT}/lib/waveshare/EPD_4in2_V2.c)
+
+# One image per program: first light (KE1, kept as the panel and key check)
+# and the layout demo (KE2). Both bind the EPD_4in2_V2 driver, the one the
+# author observed lighting the panel on 2026-09-15 (evaluation log 4.3).
+function(add_firmware_image target_name program_source)
+    add_executable(${target_name} ${program_source} ${SHARED_SOURCES} ${VENDORED_DRIVER})
     target_include_directories(${target_name} PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${REPOSITORY_ROOT}/lib/waveshare)
     target_link_libraries(${target_name} PRIVATE pico_stdlib hardware_spi hardware_gpio hardware_timer)
-    set_source_files_properties(${PROJECT_SOURCES} ${panel_binding} PROPERTIES COMPILE_OPTIONS "${PROJECT_WARNINGS}")
-    set_source_files_properties(${vendored_driver} PROPERTIES COMPILE_OPTIONS "${VENDORED_WARNINGS}")
+    set_source_files_properties(${program_source} ${SHARED_SOURCES} PROPERTIES COMPILE_OPTIONS "${PROJECT_WARNINGS}")
+    set_source_files_properties(${VENDORED_DRIVER} PROPERTIES COMPILE_OPTIONS "${VENDORED_WARNINGS}")
     # No stdio of any kind: the SDK's USB stdio would translate line endings
     # on the channel the protocol will use (evaluation log 4.1), and there is
     # nothing to print.
@@ -48,4 +55,5 @@ function(add_first_light_image target_name panel_binding vendored_driver)
     pico_add_extra_outputs(${target_name})
 endfunction()
 
-add_first_light_image(stopbath_pico_first_light panel.c ${REPOSITORY_ROOT}/lib/waveshare/EPD_4in2_V2.c)
+add_firmware_image(stopbath_pico_first_light first_light.c)
+add_firmware_image(stopbath_pico_layout_demo layout_demo.c)

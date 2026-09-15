@@ -255,9 +255,16 @@ delivered count (extension 3.2). A four second flicker per photograph would
 make the code unscannable exactly when the product is meant to work. So:
 
 **MUST** redraw only the region whose value changed, using partial refresh
-where the panel supports it, and reserve a full refresh for a page change, a
-status change, and a periodic ghost clearing pass. The regions and the policy
-are settled in `KE2` by measurement.
+where the panel supports it, and reserve a full refresh for a change to the
+code itself (page or payload), a change of link screen, and a periodic ghost
+clearing pass. The regions and the policy are settled in `KE2` by measurement.
+
+Amended 2026-09-15 at the start of `KE2`: the draft listed "a status change"
+among the full refresh triggers. `PRESENTING` becomes `GUEST_CONNECTED` as the
+first guest joins, which is exactly when others are still scanning, so a
+status change is a partial refresh of the header and hint like any other
+within-state change. The rule below already required this; the list above
+contradicted it and was wrong.
 
 **MUST NOT** let the code region refresh, partially or fully, for a change to
 any field other than `page` or `payload`. A guest part way through scanning
