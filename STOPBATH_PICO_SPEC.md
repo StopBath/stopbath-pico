@@ -771,8 +771,9 @@ repository.**
 
 ## Open
 
-`KD8` **Display layouts.** Real layouts against the panel, replacing the
-sketches in 2.6, accepted at the `KE2` hardware gate.
+`KD8` **Display layouts. Settled 2026-09-15:** the layouts in
+`remote_display/remote_display_layout.c` as rendered by the KE2 demo, accepted
+by the author at the `KE2` gate ("everything else looks good").
 
 `KD9` **Aligning Key1 after the proving phase.** Whether the mapping in 2.3
 stands, whether Key1 gains a long press meaning, or whether the appliance
@@ -811,9 +812,9 @@ on it.
 | Key polarity | active low with pull up, unverified | 4.3, `KE1` gate |
 | Long press threshold | 1000 ms (`STOPBATH_SPEC.md` 5.4 guidance) | `KD11` |
 | Debounce interval | 20 ms | `KD11` |
-| Full refresh time | 4 s, manufacturer's figure | 4.3, `KE2` gate |
-| Partial refresh time and residue | unmeasured | 4.3, `KE2` gate |
-| Partials before a forced full refresh | 5, from the manufacturer's FAQ | `KE2` gate |
+| Full refresh time | about 1580 ms, measured 2026-09-15 (the manufacturer's 4 s was not this panel's) | measured |
+| Partial refresh time and residue | about 480 ms, no residue at 24, measured 2026-09-15 | measured |
+| Partials before a forced full refresh | 100; no residue seen at 4 or at 24 (2026-09-15), the manufacturer's 5 discarded | field use, next measurement at 100 |
 | QR version, error correction, module size | version 3, low, 8 px per module | 4.4, `KE5` gate |
 | USB vendor and product | 2E8A and 0009, from the SDK descriptor source | 4.2, `KE4` gate |
 | USB serial string stability | believed stable (flash unique id), unobserved | 4.2, `KE4` gate |

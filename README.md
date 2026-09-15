@@ -19,8 +19,10 @@ owns in `docs/peripheral/`. What this project asks of the appliance is in
 scan and the firmware build run on a machine with no Pico attached, and the
 author cleared the hardware gate on 2026-09-15 (`HARDWARE_COMPATIBILITY.md`:
 the V2 panel driver, both keys, short and long). `KE2` (layouts and the
-refresh policy) is done on the automated side; its hardware gate, every
-state judged on the panel and the partial refresh observed, is outstanding. Nothing in this repository claims a hardware gate
+refresh policy) is done and its gate cleared the same day: every state
+judged on the panel, partial refresh about 480 ms with the code still, full
+about 1580 ms, no residue. `KE3` (protocol library, session, development
+peer) is next. Nothing in this repository claims a hardware gate
 has passed except where that document records the author saying so.
 
 The Wi-Fi radio is unused. A network transport is a later phase (spec Part 9).

@@ -3,14 +3,21 @@
  * action, and a stopwatch on each refresh (Pico spec, KE2 hardware gate).
  *
  * Controls, for the author judging the panel:
- *   KEY1 short   next fixture (a full refresh, since the page or link
- *                screen changes)
+ *   KEY1 short   next fixture, in the order of remote_display_fixtures.c
+ *                (the three link screens first, diagnostics last, then
+ *                round again); a full refresh each, since the page or link
+ *                screen changes. The fixture number is drawn in the spare
+ *                strip of the column so the sequence is followable
  *   KEY0 short   one more photograph delivered (a partial refresh of the
  *                count region; the code must not move)
  *   KEY0 long    toggle the error band (a partial refresh of the band)
- *   KEY1 long    toggle the diagnostic screen, whose counters are live:
- *                full and partial refreshes so far and the last refresh's
- *                duration in milliseconds
+ *   KEY1 long    toggle the diagnostic screen, showing the counters as they
+ *                stood at the toggle: full and partial refreshes so far and
+ *                the duration of the refresh before the toggle, in
+ *                milliseconds. A snapshot, deliberately: feeding each
+ *                finished refresh's duration back into the screen made the
+ *                screen differ from itself and refresh without end (the
+ *                author's observation, 2026-09-15)
  *
  * The loop never waits on the panel. A refresh is begun and the keys keep
  * being sampled; a press during a refresh changes the target state, and the
@@ -27,6 +34,7 @@
 
 #include "../remote_display/remote_bitmap.h"
 #include "../remote_display/remote_display_fixtures.h"
+#include "../remote_display/remote_font.h"
 #include "../remote_display/remote_display_layout.h"
 #include "../remote_display/remote_refresh_policy.h"
 #include "../remote_input/remote_input_model.h"
@@ -105,6 +113,36 @@ static void begin_next_partial_region(DemoState* demo) {
     }
 }
 
+/* Demo only: the fixture number, drawn after the layout in the strip of the
+ * column no region claims (between the count and the error band), so it
+ * rides along with full refreshes and is never part of a partial one. */
+static void draw_fixture_number(const DemoState* demo) {
+    if(demo->target.show_diagnostics || !demo->target.link_connected) {
+        return;
+    }
+    /* Eleven cells fit the column at this size; "FIXTURE 18/18" is
+     * thirteen and lost its last digit on the glass (author, 2026-09-15). */
+    char label[24] = "FXTR ";
+    size_t used = 5;
+    int number = demo->fixture_index + 1;
+    if(number >= 10) {
+        label[used++] = (char)('0' + number / 10);
+    }
+    label[used++] = (char)('0' + number % 10);
+    label[used++] = '/';
+    int total = remote_display_fixture_count();
+    if(total >= 10) {
+        label[used++] = (char)('0' + total / 10);
+    }
+    label[used++] = (char)('0' + total % 10);
+    label[used] = '\0';
+    RemoteLayoutRectangle count_area = remote_display_layout_region(RemoteLayoutRegionDelivered);
+    RemoteLayoutRectangle error_area = remote_display_layout_region(RemoteLayoutRegionError);
+    int strip_top = count_area.y + count_area.height;
+    int strip_height = error_area.y - strip_top;
+    remote_font_draw_text(&frame, count_area.x + 6, strip_top + (strip_height - 14) / 2, label, 2, RemoteBitmapBlack);
+}
+
 /* Called only while the panel is free. Decides what the change from shown
  * to target costs, renders the target, and begins the first refresh. */
 static void begin_refresh_if_needed(DemoState* demo) {
@@ -117,6 +155,7 @@ static void begin_refresh_if_needed(DemoState* demo) {
         return;
     }
     remote_display_layout_render(&demo->target, &frame);
+    draw_fixture_number(demo);
     demo->shown = demo->target;
     if(decision.kind == RemoteRefreshKindFull) {
         panel_begin_full_refresh(frame.bytes);
@@ -134,10 +173,6 @@ static void note_refresh_finished(DemoState* demo) {
     demo->refresh_in_progress = false;
     uint64_t elapsed = time_us_64() - demo->refresh_started_microseconds;
     demo->live.last_refresh_milliseconds = (uint32_t)(elapsed / 1000u);
-    /* If the diagnostic screen is up, it shows the figure just measured. */
-    if(demo->target.show_diagnostics) {
-        demo->target.diagnostics = demo->live;
-    }
 }
 
 int main(void) {
@@ -154,6 +189,7 @@ int main(void) {
      * the shown record and the glass agree from the start. */
     load_fixture(&demo, 3);
     remote_display_layout_render(&demo.target, &frame);
+    draw_fixture_number(&demo);
     demo.shown = demo.target;
     remote_refresh_policy_force_full(&demo.policy);
     demo.refresh_started_microseconds = time_us_64();

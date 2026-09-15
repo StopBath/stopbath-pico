@@ -317,9 +317,27 @@ void EPD_4IN2_Sleep(void);
   temperature override, `0x22 0xC7`), unmeasured and unused.
 - Conclusion: regions must start on a byte column and span whole bytes,
   which the layout enforces and a test holds. `firmware/panel.c` restores
-  the two registers before a full refresh rather than resetting; whether
-  that is enough is a `KE2` gate observation. Nothing about durations or
-  residue is known until measured.
+  the two registers before a full refresh rather than resetting.
+- OBSERVED by the author, 2026-09-15, with the KE2 layout demo: partial
+  refreshes of the count region and of the error band took on the glass;
+  full refreshes after partials drew correctly (so restoring the two
+  registers without a reset suffices); "no residue or ghosting old digits"
+  after four consecutive partials; every fixture legible ("everything else
+  looks good"); the forced full refresh on the fifth partial was visible as
+  a black flash and was at first mistaken for a fault, which is the product
+  argument for a high bound. The bound was raised from 5 to 25 as the next
+  measurement point.
+- OBSERVED by the author, 2026-09-15, durations from the diagnostic screen
+  read after one refresh of each kind: a partial refresh of the count
+  region (136 by 80 pixels) about 480 ms; a full refresh about 1580 ms.
+  The manufacturer's "Full refresh: 4s" is therefore not this panel's
+  figure (it may describe the UC8176 variant). Both include the SPI transfer
+  at 4 MHz with a chip select toggle per byte, so the panel's own update
+  time is somewhat less; a faster transfer is possible if it ever matters.
+- OBSERVED by the author, 2026-09-15: "no ghosting or residual at all" after
+  24 consecutive partial refreshes of the count region. The forced full
+  bound was moved to 100 as the next measurement point; the manufacturer's
+  five is discarded for this panel.
 
 ### Schematic
 

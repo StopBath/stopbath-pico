@@ -24,8 +24,13 @@ extern "C" {
 
 /* Partial refreshes before a full one is forced. The manufacturer's FAQ
  * advises a full refresh after five partials to clear residue (evaluation
- * log 4.3); Appendix A lists it as a starting point for the KE2 gate. */
-#define REMOTE_REFRESH_PARTIALS_BEFORE_FORCED_FULL 5
+ * log 4.3) and that was the starting point; the author observed no residue
+ * at all after four and again after twenty four partials on this panel
+ * (2026-09-15, KE2 gate), so the bound sits at the next measurement point.
+ * Every forced full is a black flash in front of a guest, so the bound
+ * should be as high as the glass allows, and a page change already gives a
+ * full refresh. */
+#define REMOTE_REFRESH_PARTIALS_BEFORE_FORCED_FULL 100
 
 typedef enum {
     RemoteRefreshKindNone,
