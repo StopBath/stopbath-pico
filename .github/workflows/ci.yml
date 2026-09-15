@@ -1,0 +1,46 @@
+# Flipper V2 as applied by the Pico specification: every pull request runs
+# the typography scan, the host tests under warnings as errors, the sanitiser
+# build, and the firmware build against the pinned SDK and compiler. The
+# protocol library tests and the short fuzz run join this file in KE3, when
+# the protocol library exists.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  repository-checks:
+    name: typography scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python3 scripts/check_typography.py
+
+  host-tests:
+    name: host tests and sanitiser build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: gcc --version
+      - run: make test
+      - run: make test-sanitise
+
+  firmware-build:
+    name: firmware build against the pinned SDK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y cmake ninja-build
+      # The same script the development machine runs: it downloads the pinned
+      # compiler, verifies Arm's digest, and clones the pinned SDK.
+      - run: scripts/setup_toolchain.sh
+      - run: scripts/build_firmware.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: firmware
+          path: dist/*.uf2

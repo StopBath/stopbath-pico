@@ -52,11 +52,11 @@ scripts/setup_toolchain.sh
 scripts/build_firmware.sh
 ```
 
-The result is `dist/stopbath_pico_first_light_v1.uf2` and
-`dist/stopbath_pico_first_light_v2.uf2`, one per vendored panel driver
-(`lib/waveshare/PROVENANCE.md` says why there are two). To flash: hold
-BOOTSEL, plug the Pico in, release, and copy one `.uf2` onto the drive that
-appears. The Pico restarts into it.
+The result is `dist/stopbath_pico_first_light.uf2`. To flash: hold BOOTSEL
+on the Pico, plug it into the PC, release, and copy the `.uf2` onto the
+`RP2350` drive that appears. The Pico restarts into it. Use a micro USB cable
+that carries data; two of the author's charging cables produced no drive at
+all (`HARDWARE_COMPATIBILITY.md`).
 
 ## Host tests
 
@@ -84,10 +84,10 @@ make check-typography PYTHON="py -3"
 
 | Path | Contents |
 |---|---|
-| `firmware/` | the pico-sdk facing application, kept thin: the first light program, the hardware layer the vendored drivers expect, the panel bindings, the build |
+| `firmware/` | the pico-sdk facing application, kept thin: the first light program, the hardware layer the vendored driver expects, the panel binding, the build |
 | `remote_input/` | pure logic: two keys, debounce, short and long classification, no SDK |
 | `remote_display/` | pure logic: the frame buffer in the panel's packing, a bitmap font, no SDK |
-| `lib/waveshare/` | the vendored panel drivers, unmodified, with provenance |
+| `lib/waveshare/` | the vendored panel driver, unmodified, with provenance |
 | `tests/` | host tests and the shared harness |
 | `scripts/` | the typography scan, the toolchain setup and firmware build scripts, the version pin |
 | `docs/evaluation/` | the Plan stage evidence log |

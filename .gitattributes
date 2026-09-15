@@ -1,0 +1,9 @@
+# LF everywhere: the scan, the Makefile, the C build and the setup script all
+# assume it, and the repository is worked on from Windows, WSL and Linux.
+* text=auto eol=lf
+*.uf2 binary
+*.png binary
+*.pdf binary
+# Vendored third party sources are kept byte for byte as upstream ships them
+# (CRLF included) so the digests in lib/waveshare/PROVENANCE.md stay true.
+lib/waveshare/EPD_* -text

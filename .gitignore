@@ -1,0 +1,13 @@
+# The pinned cross compiler, downloaded by scripts/setup_toolchain.sh into the
+# repository so the same script serves the development machine and continuous
+# integration. Pinned by scripts/toolchain_versions.env, never committed.
+.toolchain/
+# Firmware build tree (cmake and ninja output) and host test binaries.
+build/
+# Firmware artefacts: the .uf2 is produced by the build, never committed.
+dist/
+__pycache__/
+
+# Editors
+.idea/
+.vscode/
