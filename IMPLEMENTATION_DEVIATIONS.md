@@ -23,7 +23,7 @@ the contract, what was done instead, why, and the test that holds it.
 - What this does not weaken: the appliance still enforces the guard on the
   flags it receives (extension 2.2), so a different or faulty peripheral
   sending a `0` is rejected. Nothing on the appliance was relaxed
-  (`docs/APPLIANCE_HANDOFF.md` 1.2).
+  (the StopBath repository's `docs/PICO_REMOTE_HANDOFF.md` 1.2).
 - Author decision: `KD5`, 2026-09-15.
 - Covering tests: `every press encodes its event with both guard flags true`
   and `opening the port sends hello with the fixed token and no lock` in
@@ -47,7 +47,7 @@ the contract, what was done instead, why, and the test that holds it.
   test passes every value from minus eight to fifteen through it to prove
   that.
 - Author decision: `KD4`, 2026-09-15, for the proving phase; revisited as
-  `KD9` with field evidence (`docs/APPLIANCE_HANDOFF.md` Part 2 lists the
+  `KD9` with field evidence (the StopBath repository's `docs/PICO_REMOTE_HANDOFF.md` Part 2 lists the
   ways it may be aligned).
 - Covering tests: `the key1 mapping can only produce a page event` and the
   Key1 rows of `every press encodes its event with both guard flags true` in

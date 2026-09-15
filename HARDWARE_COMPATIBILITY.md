@@ -26,6 +26,8 @@ device is recorded here with the date; anything not yet measured says so.
 
 | `KE2` | each display state legible on the panel at arm's length in daylight (`KD8`); a partial refresh of the count region does not disturb the code region, observed; residue after the measured number of partials is acceptable or the forced full interval is set accordingly | CLEARED 2026-09-15 by the author: every fixture legible ("everything else looks good"), the layouts accepted as KD8; partial refreshes of the count region and the error band land with the code frame still; "no ghosting or residual at all" after four and after twenty four partials; partial refresh about 480 ms, full about 1580 ms, from the diagnostic screen. The forced full bound moved from 5 to 100. Not recorded: daylight specifically; indoor legibility was judged. |
 
+| `KE4` | against the development peer: pull and reinsert the cable twenty times and restart each side independently, with no repair step; the USB identity the Pico presents recorded | NOT YET CLEARED. Two steps. First, on this PC: flash `dist/stopbath_pico.uf2`, open the new COM port in PuTTY (Serial, any speed; PuTTY asserts DTR on open) and expect `HELLO version=1 peripheral=stopbath-pico locked=0` at once; type `DISPLAY status=PRESENTING page=WIFI payload=WIFI%3AT%3AWPA%3BS%3Atest%3BP%3Apass%3B%3B delivered=0 error=NONE` and press Enter, and expect the panel to draw it; press KEY0 and expect `BUTTON event=CENTER_SHORT foregrounded=1 unlocked=1`; close PuTTY and expect the not connected screen. Second, on the Pi (Linux): `make peer`, run `build/host/development_peer /dev/ttyACM0` (or the node `dmesg` names), drive states from its prompt, then twenty cable pulls and a restart of each side; record `lsusb -v -d 2e8a:0009` and `udevadm info -a` for the tty, twice across a reboot, into the evaluation log. |
+
 ## Measurements owed
 
 | Measurement | Owed to | Status |
@@ -35,5 +37,5 @@ device is recorded here with the date; anything not yet measured says so.
 | full refresh time | evaluation log 4.3, `KE2` | measured 2026-09-15: about 1580 ms |
 | partial refresh time and residue | evaluation log 4.3, `KE2` | measured 2026-09-15: about 480 ms, no residue at 24 |
 | firmware size against the 4 MB flash | Flipper V1 report | recorded per build in the reproduction report |
-| USB identity as Linux sees it | evaluation log 4.2, `KE4` | unobserved |
+| USB identity as Linux sees it | evaluation log 4.2, `KE4` | chosen (2E8A:0009, product string `StopBath Pico Remote`, flash unique id serial); unobserved |
 | total draw beside the appliance's radio adapter | evaluation log 4.5, `KE4` | unmeasured |

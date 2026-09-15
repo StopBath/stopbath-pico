@@ -34,5 +34,5 @@ Which event Key1 sends is decided by the page in the last `DISPLAY` received
 ## What this repository never proposes
 
 A protocol change. If the field shows one is needed, it is raised in the
-StopBath repository as a version 2 decision (spec 2.8, `docs/APPLIANCE_HANDOFF.md`
+StopBath repository as a version 2 decision (spec 2.8, the StopBath repository's `docs/PICO_REMOTE_HANDOFF.md`
 Part 2).

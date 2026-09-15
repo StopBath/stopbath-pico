@@ -17,6 +17,7 @@ unstated.
 | `tests/test_remote_protocol.c` (KE3, copied from the Flipper repository) | host, any `gcc` | `make test` |
 | `tests/test_development_peer.c` (KE3, copied from the Flipper repository) | host, any `gcc` | `make test` |
 | `tests/test_remote_session.c` (KE3) | host, any `gcc` | `make test` |
+| `tests/test_remote_link_edge.c` (KE4) | host, any `gcc` | `make test` |
 | protocol parser fuzz harness (KE3) | host, deterministic; sanitised on Linux | `make fuzz`, `make fuzz-sanitise` |
 | generated tables match `protocol.json` (KE3) | any Python 3 | `make check-protocol-tables` |
 | `protocol.json` is the appliance's frozen definition (KE3) | any Python 3 | `make check-protocol-definition` |
@@ -82,6 +83,14 @@ error code the protocol defines renders inside the error band. In
 `tests/test_remote_session.c`, written and seen to fail before the session
 existed.
 
+`KE4`: the transport glue's decision table is total over every prior state
+and observation, opens only on cable and DTR together, reports each edge
+once, and treats a cable pull and reinsertion as a close then an open, the
+same as the Flipper's transport. In `tests/test_remote_link_edge.c`, written
+and seen to fail before the module existed. The SDK facing edge
+(`firmware/usb_link.c`) is not testable off the device and is the `KE4`
+hardware gate.
+
 ## Testing deviations
 
 Hardware specific behaviour that cannot reasonably be automated, with the
@@ -95,6 +104,7 @@ reason (Flipper Part 6):
 | The classification thresholds feel right | a hand, not a test | `KD11`, field use |
 | Partial refresh leaves the code region undisturbed on the glass and how much residue it leaves | needs the panel; the bitmap side is proven on the host | `KE2` gate |
 | Full and partial refresh durations | needs the panel; the demo measures and shows them | `KE2` gate |
+| The USB link opens on DTR, closes on a cable pull, and recovers | needs the device and a host; the decision table is proven on the host, TinyUSB's reporting of the facts is not | `KE4` gate |
 
 ## Hardware gates
 

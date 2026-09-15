@@ -381,7 +381,6 @@ two meets one shape:
 | `tests/` | host tests and the shared harness |
 | `scripts/` | the typography scan, the SDK setup script, generators |
 | `docs/evaluation/` | the Plan stage evidence log |
-| `docs/` | `APPLIANCE_HANDOFF.md`, the changes asked of the StopBath repository |
 
 **MUST** keep every module outside `firmware/` and `lib/` free of pico-sdk,
 TinyUSB and driver includes, so it builds and tests on the development machine
@@ -427,7 +426,7 @@ Verify in pico-sdk and TinyUSB source: how the device learns DTR
 resume, what the default descriptors are (vendor, product, serial string,
 interface count), whether the serial string is stable across reboots, and what
 `lsusb` and `udevadm info` show on the appliance's Debian release. The udev
-rule in `docs/APPLIANCE_HANDOFF.md` depends on the last two.
+rule in the StopBath repository's `docs/PICO_REMOTE_HANDOFF.md` depends on the last two.
 
 ## 4.3 Display
 
@@ -591,7 +590,7 @@ Flipper's, since the appliance's behaviour was proven against that.
 **Hardware gate** Against the development peer on a Linux host or WSL: pull
 and reinsert the cable twenty times and restart each side independently, with
 no repair step. The USB identity the Pico presents (`lsusb`, `udevadm info`)
-recorded in the evaluation log; it feeds `docs/APPLIANCE_HANDOFF.md`.
+recorded in the evaluation log; it feeds the StopBath repository's `docs/PICO_REMOTE_HANDOFF.md`.
 
 ## KE5: QR rendering
 
@@ -621,7 +620,7 @@ and the lighting.
 **Work** Whatever small changes the first sessions against a real appliance
 expose. Nothing speculative.
 
-**Precondition** `docs/APPLIANCE_HANDOFF.md` implemented in the StopBath
+**Precondition** the StopBath repository's `docs/PICO_REMOTE_HANDOFF.md` implemented in the StopBath
 repository, at least the device rule, so the appliance can find the Pico.
 
 **Excluded** Everything in Part 9. Any protocol change.
@@ -731,7 +730,7 @@ is a physical key, while a network peripheral is reachable by anything on the
 trusted network that can speak the protocol, so the threat model widens and
 the appliance must decide how a network peer proves it is the photographer's
 device. The shape of that is sketched, not specified, in
-`docs/APPLIANCE_HANDOFF.md` Part 3, and decided in the StopBath repository
+the StopBath repository's `docs/PICO_REMOTE_HANDOFF.md` Part 3, and decided in the StopBath repository
 (`KD10`).
 
 ---
@@ -766,7 +765,7 @@ than the VS Code extension**, so continuous integration runs the same script.
 
 `KD7` **Peripheral token and appliance device rule. Settled: token
 `stopbath-pico`; the rule via a generalisation of the appliance's script 47,
-specified in `docs/APPLIANCE_HANDOFF.md` and implemented in the StopBath
+specified in the StopBath repository's `docs/PICO_REMOTE_HANDOFF.md` and implemented in the StopBath
 repository.**
 
 ## Open
@@ -816,7 +815,7 @@ on it.
 | Partial refresh time and residue | about 480 ms, no residue at 24, measured 2026-09-15 | measured |
 | Partials before a forced full refresh | 100; no residue seen at 4 or at 24 (2026-09-15), the manufacturer's 5 discarded | field use, next measurement at 100 |
 | QR version, error correction, module size | version 3, low, 8 px per module | 4.4, `KE5` gate |
-| USB vendor and product | 2E8A and 0009, from the SDK descriptor source | 4.2, `KE4` gate |
+| USB vendor and product | 2E8A and 0009, chosen in `KE4` per Raspberry Pi's guidance, with product string `StopBath Pico Remote` | 4.2, observed at the `KE4` gate |
 | USB serial string stability | believed stable (flash unique id), unobserved | 4.2, `KE4` gate |
 | Line ending translation in `stdio_usb` | believed on by default, unverified | 4.1, `KE4` |
 | Total draw beside the radio adapter | unmeasured | 4.5, `KE4` gate |
@@ -826,5 +825,6 @@ on it.
 `README.md`, `PROTOCOL.md` referencing the definition in the StopBath
 repository, `TESTING.md`, `IMPLEMENTATION_DEVIATIONS.md`,
 `HARDWARE_COMPATIBILITY.md`, `FIELD_NOTES.md`,
-`docs/evaluation/ACTUAL_CONTRACT_EVALUATION.md`, `docs/APPLIANCE_HANDOFF.md`,
-and `LICENSE`.
+`docs/evaluation/ACTUAL_CONTRACT_EVALUATION.md` and `LICENSE`. The changes asked
+of the appliance live with it, in the StopBath repository's
+`docs/PICO_REMOTE_HANDOFF.md`.

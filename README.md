@@ -11,7 +11,7 @@ guest and the meaning of every button. The specification is
 `STOPBATH_PICO_SPEC.md`; it applies `STOPBATH_FLIPPER_SPEC.md` (the first
 peripheral) by reference and implements the protocol the StopBath repository
 owns in `docs/peripheral/`. What this project asks of the appliance is in
-`docs/APPLIANCE_HANDOFF.md`.
+the StopBath repository's `docs/PICO_REMOTE_HANDOFF.md`.
 
 ## Status
 
@@ -22,8 +22,10 @@ the V2 panel driver, both keys, short and long). `KE2` (layouts and the
 refresh policy) is done and its gate cleared the same day: every state
 judged on the panel, partial refresh about 480 ms with the code still, full
 about 1580 ms, no residue. `KE3` (protocol library, session, development
-peer) is done: the device speaks protocol version 1 on the host, against the
-development peer. Nothing has yet carried it over USB; that is `KE4`. Nothing in this repository claims a hardware gate
+peer) is done. `KE4` (the USB transport) is done on the automated side:
+`dist/stopbath_pico.uf2` is the remote itself, speaking protocol version 1
+over USB CDC; its hardware gate, twenty cable pulls against the development
+peer, is outstanding. Nothing in this repository claims a hardware gate
 has passed except where that document records the author saying so.
 
 The Wi-Fi radio is unused. A network transport is a later phase (spec Part 9).
@@ -56,10 +58,10 @@ bash scripts/setup_toolchain.sh
 bash scripts/build_firmware.sh
 ```
 
-The result is `dist/stopbath_pico_first_light.uf2` (KE1, the panel and key
-check) and `dist/stopbath_pico_layout_demo.uf2` (KE2, every display state
-and the refresh policy; its controls are in `HARDWARE_COMPATIBILITY.md`).
-To flash: hold BOOTSEL
+The result is `dist/stopbath_pico.uf2`, the remote; and two check images,
+`dist/stopbath_pico_first_light.uf2` (KE1, the panel and keys) and
+`dist/stopbath_pico_layout_demo.uf2` (KE2, every display state and the
+refresh policy; controls in `HARDWARE_COMPATIBILITY.md`). To flash: hold BOOTSEL
 on the Pico, plug it into the PC, release, and copy the `.uf2` onto the
 `RP2350` drive that appears. The Pico restarts into it. Use a micro USB cable
 that carries data; two of the author's charging cables produced no drive at
@@ -98,7 +100,8 @@ make check-typography PYTHON="py -3"
 
 | Path | Contents |
 |---|---|
-| `firmware/` | the pico-sdk facing application, kept thin: the two programs, the hardware layer the vendored driver expects, the non-blocking panel driving, the build |
+| `firmware/` | the pico-sdk facing application, kept thin: the remote and the two check programs, the keys, the hardware layer the vendored driver expects, the non-blocking panel driving and refresher, the USB CDC link and descriptors, the build |
+| `transport/` | pure logic: the link's decision table (cable and DTR to port opened and closed), no SDK |
 | `remote_input/` | pure logic: two keys, debounce, short and long classification, no SDK |
 | `remote_display/` | pure logic: the frame buffer in the panel's packing, a bitmap font, the layout with its regions, the fixtures, the refresh policy, no SDK |
 | `protocol/` | the parser and encoder copied from the Flipper repository with provenance, and the tables generated from `protocol.json` |
@@ -109,13 +112,12 @@ make check-typography PYTHON="py -3"
 | `tests/` | host tests and the shared harness |
 | `scripts/` | the typography scan, the toolchain setup and firmware build scripts, the version pin |
 | `docs/evaluation/` | the Plan stage evidence log |
-| `docs/APPLIANCE_HANDOFF.md` | what the StopBath repository is asked to change |
 
 ## Documents
 
 `STOPBATH_PICO_SPEC.md`, `PROTOCOL.md`, `TESTING.md`,
 `IMPLEMENTATION_DEVIATIONS.md`, `HARDWARE_COMPATIBILITY.md`,
-`FIELD_NOTES.md`, `docs/APPLIANCE_HANDOFF.md` and
+`FIELD_NOTES.md` and
 `docs/evaluation/ACTUAL_CONTRACT_EVALUATION.md` are the documents the
 specification requires. Each says what it is for at the top.
 

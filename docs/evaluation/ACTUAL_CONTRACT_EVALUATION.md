@@ -77,6 +77,22 @@ author; everything else is documentation.
   TinyUSB's CDC calls directly. Waveshare's `DEV_Config.c`, which calls
   `stdio_init_all`, is not vendored for this reason (`lib/waveshare/PROVENANCE.md`).
 
+### TinyUSB configuration
+
+- Source: `src/rp2_common/pico_stdio_usb/include/tusb_config.h` at the
+  pinned tag, and `lib/tinyusb/hw/bsp/rp2040/family.cmake` lines 68 and 69.
+- Retrieved: 2026-09-15
+- Observed: the SDK's own configuration sets `CFG_TUSB_RHPORT0_MODE`
+  `OPT_MODE_DEVICE`, `CFG_TUD_CDC` 1, and the CDC RX, TX and endpoint buffer
+  sizes (64 at full speed); `CFG_TUSB_MCU` and `CFG_TUSB_OS` are supplied by
+  the SDK's TinyUSB build, not by the project's `tusb_config.h`. The SDK's
+  `tinyusb_device` target is what a project links; `pico_stdio_usb` links the
+  unmarked variant of the same.
+- Conclusion: `firmware/tusb_config.h` follows the SDK's, with the RX and TX
+  FIFOs raised to 512 so a whole protocol line fits between two services of
+  the loop. The remote links `tinyusb_device`, `tinyusb_board` and
+  `pico_unique_id`.
+
 ### Toolchain
 
 - Source: https://raw.githubusercontent.com/raspberrypi/pico-sdk/2.3.1/README.md
@@ -145,17 +161,27 @@ author; everything else is documentation.
   and a serial string filled by `pico_get_unique_board_id_string`. `bDeviceClass`
   is `TUSB_CLASS_MISC` with the IAD protocol. One CDC function, occupying
   interfaces 0 (control) and 1 (data).
-- Uncertain: these are the `stdio_usb` descriptors. A firmware that drives
-  TinyUSB directly supplies its own descriptors and may keep these values or
-  choose its own; the choice is made in `KE4` and recorded here. Whether the
-  unique board id serial string is identical across reboots and re-enumerations
-  is believed but unobserved. What Linux `cdc_acm` shows as `bInterfaceNumber`
-  for the tty is unobserved.
+- Read again at the pinned tag on 2026-09-15 in the author's checkout: the
+  same values, plus the configuration descriptor (`TUD_CONFIG_DESCRIPTOR`
+  with bus powered attributes and 250 mA, `TUD_CDC_DESCRIPTOR` on interface 0
+  with endpoints `0x81`, `0x02`, `0x82`, packet sizes 8 and 64) and the
+  string callback, which the SDK caps at `USBD_DESC_STR_MAX` 20 units.
+- Decided in `KE4` (`firmware/usb_descriptors.c`): the same descriptors, with
+  vendor `2E8A` and product `0009` kept, the product string
+  `StopBath Pico Remote`, the interface string `StopBath peripheral link`,
+  the serial string the flash unique id, and the string cap raised to 32 so
+  the product name is not cut. Raspberry Pi's `usb-pid` repository (read
+  2026-09-15) lists `0x0009` as "Raspberry Pi Pico SDK CDC UART" and says a
+  standard interface device needs no separate product id and can be
+  identified by its product string, which is what is done. Whether the
+  unique board id serial string is identical across reboots and
+  re-enumerations is believed but unobserved. What Linux `cdc_acm` shows as
+  `bInterfaceNumber` for the tty is unobserved.
 - Experiment, `KE4` gate: `lsusb -v` and `udevadm info -a` on the appliance
   with the Pico attached, twice, across a reboot of each side.
 - Conclusion so far: a Pico 2 W presents vendor `2E8A`, product `0009`, one
   CDC channel, and therefore one `ttyACM` node. This is what
-  `docs/APPLIANCE_HANDOFF.md` asks the appliance's device rule to match.
+  the StopBath repository's `docs/PICO_REMOTE_HANDOFF.md` asks the appliance's device rule to match.
 
 ### DTR and suspend
 
@@ -167,9 +193,25 @@ author; everything else is documentation.
   `TU_ATTR_WEAK void tud_cdc_line_state_cb(uint8_t itf, bool dtr, bool rts);`,
   `void tud_mount_cb(void);`, `void tud_umount_cb(void);`,
   `void tud_suspend_cb(bool remote_wakeup_en);`, `void tud_resume_cb(void);`.
-- Uncertain, to settle in `KE4` by reading their implementations: that
-  `tud_cdc_n_connected` is the DTR line and nothing else, and when each
-  callback fires across a cable pull and a host side close. The Flipper's transport (`remote_transport.c`) found
+- Read in `KE4`, 2026-09-15, same sources:
+  - `tud_cdc_n_connected` (cdc_device.c line 132) is
+    `tud_ready() && tu_bit_test(_cdcd_itf[itf].line_state, 0)`, and
+    `tud_ready` (usbd.h line 97) is `tud_mounted() && !tud_suspended()`.
+    So the one call is the Flipper's whole table: cable present (mounted,
+    not suspended) and DTR asserted.
+  - `line_state` is set from `CDC_REQUEST_SET_CONTROL_LINE_STATE` (line
+    403 on), bit 0 DTR, bit 1 RTS, and `cdcd_reset` (line 290) clears the
+    interface structure up to `wanted_char`, which includes `line_state`.
+    A bus reset therefore clears DTR, and the stale DTR the Flipper had to
+    revalidate after a re-enumeration cannot occur here.
+  - The stack is serviced by `tud_task()` from the loop; `tusb_init()` is
+    the macro form of `tusb_rhport_init(0, NULL)` and returns a bool, which
+    `firmware/usb_link.c` checks.
+- Conclusion: `firmware/usb_link.c` polls `tud_ready()` and
+  `tud_cdc_n_connected(0)` every tick and passes them to the decision table
+  in `transport/remote_link_edge.c`, which is tested on the host against the
+  Flipper's table. No callback is needed. When each fact changes across a
+  physical cable pull, and how quickly, is observed at the `KE4` gate. The Flipper's transport (`remote_transport.c`) found
   that a physical cable pull produces no DTR drop and that a resume can arrive
   with no suspend before it, leaving cached DTR stale; the Pico transport must
   be checked for the same two cases.
@@ -391,7 +433,7 @@ attached, whether its identifier is stable across reattachment and reboot, how
 attach and detach are detected, and what happens to an open handle when the
 device disappears. The Flipper's answers are in the StopBath repository's
 evaluation log; the Pico's are recorded here at the `KE4` gate and then carried
-into `docs/APPLIANCE_HANDOFF.md`.
+into the StopBath repository's `docs/PICO_REMOTE_HANDOFF.md`.
 
 ---
 

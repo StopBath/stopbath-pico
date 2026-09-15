@@ -17,7 +17,6 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "hardware/gpio.h"
 #include "hardware/timer.h"
 #include "pico/stdlib.h"
 
@@ -25,18 +24,8 @@
 #include "../remote_display/remote_font.h"
 #include "../remote_input/remote_input_model.h"
 #include "DEV_Config.h"
+#include "keys.h"
 #include "panel.h"
-
-/* The two keys, from the module schematic (evaluation log 4.3): each is a
- * switch to ground with no pull up on the board, so the Pico's internal
- * pull ups are enabled and a press reads low. */
-#define KEY0_GPIO 15u
-#define KEY1_GPIO 17u
-
-/* Sampling period. Well under the debounce interval so a bounce is seen as
- * several samples, and fast enough that the long press threshold lands
- * within a few milliseconds of the figure. */
-#define SAMPLE_PERIOD_MILLISECONDS 5u
 
 /* The legend and log are drawn at this scale; chosen to be readable across
  * a desk, revised in KE2 against the real panel. */
@@ -142,19 +131,8 @@ static void draw_frame(const FirstLightState* state) {
     }
 }
 
-static void configure_key(uint gpio) {
-    gpio_init(gpio);
-    gpio_set_dir(gpio, false);
-    gpio_pull_up(gpio);
-}
-
-static bool key_is_pressed(uint gpio) {
-    return !gpio_get(gpio);
-}
-
 int main(void) {
-    configure_key(KEY0_GPIO);
-    configure_key(KEY1_GPIO);
+    keys_initialise();
 
     DEV_Module_Init();
     panel_initialise();
@@ -171,16 +149,15 @@ int main(void) {
 
     uint64_t last_sample_microseconds = time_us_64();
     while(true) {
-        sleep_ms(SAMPLE_PERIOD_MILLISECONDS);
+        sleep_ms(KEYS_SAMPLE_PERIOD_MILLISECONDS);
         uint64_t now_microseconds = time_us_64();
         uint32_t elapsed_milliseconds = (uint32_t)((now_microseconds - last_sample_microseconds) / 1000u);
         last_sample_microseconds = now_microseconds;
 
         bool redraw = false;
-        const uint key_gpios[RemoteInputKeyCount] = {KEY0_GPIO, KEY1_GPIO};
         for(int key = 0; key < (int)RemoteInputKeyCount; key++) {
             RemoteInputOutcome outcome =
-                remote_input_model_observe(&input_model, key, key_is_pressed(key_gpios[key]), elapsed_milliseconds);
+                remote_input_model_observe(&input_model, key, keys_is_pressed((RemoteInputKey)key), elapsed_milliseconds);
             if(outcome.kind == RemoteInputOutcomeClassifiedPress) {
                 state.counts[outcome.key][outcome.press_kind]++;
                 state.last_event[0] = '\0';

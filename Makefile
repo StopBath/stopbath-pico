@@ -37,8 +37,9 @@ PURE_LOGIC_SOURCES := remote_input/remote_input_model.c \
                       protocol/remote_protocol_tables.c \
                       protocol/remote_protocol.c \
                       peer/development_peer_core.c \
-                      session/remote_session.c
-PURE_LOGIC_HEADERS := $(wildcard remote_input/*.h remote_display/*.h protocol/*.h peer/*.h session/*.h)
+                      session/remote_session.c \
+                      transport/remote_link_edge.c
+PURE_LOGIC_HEADERS := $(wildcard remote_input/*.h remote_display/*.h protocol/*.h peer/*.h session/*.h transport/*.h)
 
 # The fuzz driver: the protocol library plus the harness, run for a fixed
 # number of deterministic inputs. FUZZ_ITERATIONS sets how many.
