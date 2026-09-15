@@ -281,8 +281,20 @@ void EPD_4IN2_Sleep(void);
   `EPD_4in2` image did not ("v1 didn't work v2 did"). The panel in hand
   therefore speaks the V2 command set, whatever the wiki's UC8176 datasheet
   link suggests. The V1 driver and image were removed the same evening
-  (`lib/waveshare/PROVENANCE.md`). Whether the keys registered on the panel
-  is not yet reported; it completes the gate.
+  (`lib/waveshare/PROVENANCE.md`).
+- OBSERVED by the author, 2026-09-15: "Key0 and Key1 both update on short
+  and long". The schematic's GP15 and GP17, active low with internal pull
+  ups, are confirmed, and the input model's classification holds on the
+  device at the Appendix A thresholds (1000 ms, 20 ms debounce), which stay
+  as starting points until `KD11`.
+- OBSERVED by the author, 2026-09-15: "if you press while the screen is
+  refreshing it doesn't record the new value". Expected: the first light
+  program calls the driver's blocking full refresh and samples no key until
+  it returns. It sets the requirement for `KE2` that key sampling and the
+  panel's busy wait be decoupled (the driver spins on the BUSY line with a
+  10 ms sleep per iteration, `EPD_4IN2_V2_ReadBusy`), and it is the first
+  data point on how long a full refresh actually takes: long enough to lose a
+  press, which a photographer will do.
 - OBSERVED by the author, 2026-09-15, about the cable: two micro USB cables
   produced no enumeration at all on the PC in BOOTSEL mode (no `RP2350`
   drive, no device of any kind); a third cable worked at once. Recorded so

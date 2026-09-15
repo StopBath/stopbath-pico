@@ -15,12 +15,12 @@ owns in `docs/peripheral/`. What this project asks of the appliance is in
 
 ## Status
 
-`KE1` (foundation and first light) is done on the automated side. The host
-tests, the typography scan and the firmware build run on a machine with no
-Pico attached. The `KE1` hardware gate, the first light image on the author's
-device, is the author's to clear and is recorded in
-`HARDWARE_COMPATIBILITY.md`. Nothing in this repository claims a hardware
-gate has passed.
+`KE1` (foundation and first light) is done: the host tests, the typography
+scan and the firmware build run on a machine with no Pico attached, and the
+author cleared the hardware gate on 2026-09-15 (`HARDWARE_COMPATIBILITY.md`:
+the V2 panel driver, both keys, short and long). `KE2` (layouts and the
+refresh policy) is next. Nothing in this repository claims a hardware gate
+has passed except where that document records the author saying so.
 
 The Wi-Fi radio is unused. A network transport is a later phase (spec Part 9).
 
