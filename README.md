@@ -28,8 +28,11 @@ over USB CDC, proven against the development peer through twenty three
 cable pulls. `KE5` (the QR code) is done and its gate cleared: the code region draws a
 real code, version 3 at 7 pixels a module for the appliance's Wi-Fi payload,
 proven against an independent encoder's matrices and scanned from arm's
-length on several phones. `KE6`, the first session against the real
-appliance, waits on the appliance's device profile for this remote. Nothing in this repository claims a hardware gate
+length on several phones. `KE6`, the first sessions against the real appliance, is done and its gate
+cleared: sessions started and ended from the Pico and from the dashboard, a
+guest joined and saw photographs from the panel's codes, and the
+photographer's verdict is in `FIELD_NOTES.md`. Nothing the field showed
+needed a change. Nothing in this repository claims a hardware gate
 has passed except where that document records the author saying so.
 
 The Wi-Fi radio is unused. A network transport is a later phase (spec Part 9).

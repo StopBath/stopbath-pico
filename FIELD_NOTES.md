@@ -47,3 +47,4 @@ None recorded.
 
 | Date | Observation | Question it bears on |
 |---|---|---|
+| 2026-09-15 | First sessions against the real appliance, at the desk: a guest phone joined from the Wi-Fi code on the panel and opened the gallery from the panel's address, four photographs arrived and the count rose beside a code that did not move, and the session was ended from the Pico once and from the dashboard once; a session started from the dashboard reached the panel on its own (appliance journal, evaluation log KE6). The photographer's answer, verbatim: "It kicks the shit out of using my phone." | Does showing the code from the Pico beat using a phone? Yes, in the photographer's words. Do subjects scan it reliably? Is one key to switch pages the right interaction? |

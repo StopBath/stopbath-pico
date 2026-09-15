@@ -551,6 +551,53 @@ into the StopBath repository's `docs/PICO_REMOTE_HANDOFF.md`.
 
 ---
 
+## KE6: the first sessions against the real appliance
+
+- OBSERVED by the author, 2026-09-15, from the appliance's journal
+  (`journalctl -u stopbath`, peripheral lines), with the appliance's `pico`
+  device profile written and `[peripheral]` naming `/dev/stopbath/remote`:
+  attach at 20:29:07, `HELLO` accepted, "peripheral connected" with
+  `peripheral=stopbath-pico`, `version=1`, and a READY record written. Then
+  three sessions driven from the Pico: `CENTER_SHORT` (a 51 byte line)
+  started each and a `PRESENTING`/`WIFI` record with the real payload was
+  written (126 and 130 bytes on the wire, the difference being the percent
+  encoding of the passphrase's punctuation); `RIGHT_SHORT` (50 bytes) moved
+  the page to `GUEST` (a 97 byte record) and `LEFT_SHORT` (49 bytes) back to
+  `WIFI`; `CENTER_LONG` (50 bytes) ended each and READY was written. During
+  the third session the cable was pulled ("peripheral detached, device
+  gone, link_drops 1") and reinserted six seconds later; the appliance
+  accepted the new `HELLO` and resent the full `PRESENTING`/`WIFI` record,
+  so the panel caught up without a repair step, and `CENTER_LONG` then ended
+  the session. No `GUARD`, no `MALFORMED`, no refusal of any line.
+- Observed alongside: the appliance writes an identical record two or three
+  times around a transition (the coordinator publishing on more than one
+  event); the remote's policy sees no change between identical records and
+  does not refresh, so nothing flickers.
+- OBSERVED by the author, 2026-09-15, two further sessions from the full
+  appliance journal ("yes to everything" for the panel and dashboard, with
+  the journal as the record):
+  - `HbMHGw`, 20:32:53 to 20:33:05: started by `CENTER_SHORT`, the gallery
+    page selected by `RIGHT_SHORT`, ended by `CENTER_LONG` from the Pico:
+    the termination audit event, `guest_denied` firewall policy, the guest
+    network torn down and READY sent within 130 ms of the press.
+  - `D47NhX`, 20:33:54 to 20:36:14: started by `CENTER_SHORT`; the camera's
+    FTP client connected on the trusted network; a guest phone (Samsung
+    SM-F926B, Android 15) joined the guest network at 20:34:11, from the
+    Wi-Fi code on the panel; `RIGHT_SHORT` to the gallery page; the phone
+    reached `192.168.72.1/` and was authorised at 20:34:40, on which the
+    appliance sent `GUEST_CONNECTED` on the same page (a partial refresh of
+    the header, the code untouched); four photographs accepted and
+    published, each followed by a record with the new count (four partial
+    refreshes of the count region); the phone then moved to the trusted
+    network and opened the dashboard, and the dashboard ended the session
+    at 20:36:14 with no `BUTTON` before it, READY reaching the Pico 70 ms
+    after the terminated event. No `GUARD`, `MALFORMED` or refusal in
+    either session. The dashboard showed `peripheral` as the origin of the
+    Pico ended session (author's report).
+- OBSERVED by the author, 2026-09-15: a session started from the dashboard
+  with the Pico attached, the panel following to PRESENTING with the code on
+  its own. Nothing further is owed for `KE6`.
+
 ## Decisions still needing the author
 
 See `STOPBATH_PICO_SPEC.md` Part 10. Open at 2026-09-15: `KD8` (layouts, at
