@@ -58,6 +58,7 @@ TEXT_FILE_SUFFIXES = {
     ".sh",
     ".cmd",
     ".cmake",
+    ".ps1",
 }
 TEXT_FILE_NAMES = {"Makefile", "LICENSE", ".gitignore", ".env", ".gitattributes", ".editorconfig", "CMakeLists.txt"}
 

@@ -22,6 +22,7 @@ unstated.
 | generated tables match `protocol.json` (KE3) | any Python 3 | `make check-protocol-tables` |
 | `protocol.json` is the appliance's frozen definition (KE3) | any Python 3 | `make check-protocol-definition` |
 | the development peer builds (KE3) | Linux or WSL (termios) | `make peer` |
+| a first look at the link from Windows (KE4, a hardware check, not a test) | Windows PowerShell, the device on a COM port | `scripts\link_check.ps1 -Port COMn` |
 | all of the above under address and undefined behaviour sanitisers | Linux or WSL | `make test-sanitise` |
 | typography scan (Flipper 0.8) | any Python 3 | `make check-typography` |
 | firmware build, warnings as errors, against the pinned SDK and compiler | host with the toolchain from `scripts/setup_toolchain.sh` | `scripts/build_firmware.sh` |

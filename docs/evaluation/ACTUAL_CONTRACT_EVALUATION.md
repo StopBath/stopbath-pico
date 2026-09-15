@@ -211,7 +211,19 @@ author; everything else is documentation.
   `tud_cdc_n_connected(0)` every tick and passes them to the decision table
   in `transport/remote_link_edge.c`, which is tested on the host against the
   Flipper's table. No callback is needed. When each fact changes across a
-  physical cable pull, and how quickly, is observed at the `KE4` gate. The Flipper's transport (`remote_transport.c`) found
+  physical cable pull, and how quickly, is observed at the `KE4` gate.
+- OBSERVED by the author, 2026-09-15, on the Windows PC with
+  `scripts/link_check.ps1` on `COM8`: opening the port with DTR asserted
+  produced `HELLO version=1 peripheral=stopbath-pico locked=0` at once and
+  again two seconds later (the handshake retry); sending one `DISPLAY`
+  record with a bare line feed stopped the retries; over the next twenty
+  seconds every press arrived as `BUTTON event=... foregrounded=1
+  unlocked=1`, with `CENTER_SHORT`, `CENTER_LONG` and, on the Wi-Fi page,
+  `RIGHT_SHORT` for Key1; closing the port ended the session. PuTTY was
+  tried first and could not be made to send a bare line feed or to paste,
+  which is why the script exists. The USB identity as Windows names it
+  (`COM8`, and the product string in Device Manager) was not recorded; the
+  Linux observation at step two of the gate is the one the appliance needs. The Flipper's transport (`remote_transport.c`) found
   that a physical cable pull produces no DTR drop and that a resume can arrive
   with no suspend before it, leaving cached DTR stale; the Pico transport must
   be checked for the same two cases.

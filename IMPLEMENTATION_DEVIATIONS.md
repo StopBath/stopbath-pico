@@ -53,6 +53,27 @@ the contract, what was done instead, why, and the test that holds it.
   Key1 rows of `every press encodes its event with both guard flags true` in
   `tests/test_remote_session.c`.
 
+## A PowerShell script is the Windows side link check
+
+- The contract: Pico spec 0.14, one rule set across two languages: C for
+  the firmware and the pure logic, Python for the scans and generators,
+  shell for setup, and no third.
+- What was done instead: `scripts/link_check.ps1`, a PowerShell script that
+  opens the remote's COM port with DTR, answers its HELLO with one DISPLAY
+  record and prints the BUTTON lines the keys produce.
+- Why: the development peer is POSIX and does not build on the Windows
+  host, and the terminal to hand (PuTTY) could not be made to send a bare
+  line feed or to paste, so the first look at the link (the KE4 gate's step
+  one) had no tool. PowerShell opens a serial port with DTR control and an
+  exact line ending with nothing to install, which Python here would need
+  (`pyserial`). The script is a development check on the author's machine,
+  never part of the firmware, the tests or continuous integration, and it
+  interprets nothing: the one record it sends is fixture text.
+- Author decision requested: whether this stands, or is replaced by a
+  Python script once `pyserial` is installed. Recorded 2026-09-15.
+- Covering test: none can be automated; it was seen to work on 2026-09-15
+  (evaluation log 4.2).
+
 ## Waveshare's identifiers are kept in the hardware layer
 
 - The contract: Flipper 0.5, verbose self documenting names, no `buf`,

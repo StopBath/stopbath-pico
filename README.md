@@ -83,6 +83,14 @@ MinGW `gcc` on Windows does not ship. Run it under WSL or on Linux:
 make test-sanitise
 ```
 
+A first look at the link from this PC, with the remote flashed and on a COM
+port (it opens the port with DTR, answers the HELLO, and prints what the
+keys send for twenty seconds):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\link_check.ps1 -Port COM8
+```
+
 The protocol checks: the generated tables against `protocol.json`, and
 `protocol.json` against the appliance's frozen definition:
 
