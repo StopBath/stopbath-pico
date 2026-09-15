@@ -280,7 +280,7 @@ static void render_diagnostics(const RemoteDisplayState* display_state, RemoteBi
     y += step;
     render_diagnostic_line(bitmap, y, "VERSION MISMATCHES", diagnostics->version_mismatches);
     y += step;
-    render_diagnostic_line(bitmap, y, "DROPPED BY GUARD", diagnostics->events_dropped_by_guard);
+    render_diagnostic_line(bitmap, y, "DROPPED NO LINK", diagnostics->events_dropped_no_link);
     y += step;
     render_diagnostic_line(bitmap, y, "DROPPED OUTPUT FULL", diagnostics->events_dropped_by_output_full);
     y += step;

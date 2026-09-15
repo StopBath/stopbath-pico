@@ -62,7 +62,7 @@ typedef struct {
     uint32_t reconnections;
     uint32_t malformed_received;
     uint32_t version_mismatches;
-    uint32_t events_dropped_by_guard;
+    uint32_t events_dropped_no_link;
     uint32_t events_dropped_by_output_full;
     uint32_t handshake_retries;
     uint32_t full_refreshes;

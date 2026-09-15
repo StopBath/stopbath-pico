@@ -14,6 +14,13 @@ unstated.
 | `tests/test_remote_bitmap.c` (KE1) | host, any `gcc` | `make test` |
 | `tests/test_remote_display_layout.c` (KE2) | host, any `gcc` | `make test` |
 | `tests/test_remote_refresh_policy.c` (KE2) | host, any `gcc` | `make test` |
+| `tests/test_remote_protocol.c` (KE3, copied from the Flipper repository) | host, any `gcc` | `make test` |
+| `tests/test_development_peer.c` (KE3, copied from the Flipper repository) | host, any `gcc` | `make test` |
+| `tests/test_remote_session.c` (KE3) | host, any `gcc` | `make test` |
+| protocol parser fuzz harness (KE3) | host, deterministic; sanitised on Linux | `make fuzz`, `make fuzz-sanitise` |
+| generated tables match `protocol.json` (KE3) | any Python 3 | `make check-protocol-tables` |
+| `protocol.json` is the appliance's frozen definition (KE3) | any Python 3 | `make check-protocol-definition` |
+| the development peer builds (KE3) | Linux or WSL (termios) | `make peer` |
 | all of the above under address and undefined behaviour sanitisers | Linux or WSL | `make test-sanitise` |
 | typography scan (Flipper 0.8) | any Python 3 | `make check-typography` |
 | firmware build, warnings as errors, against the pinned SDK and compiler | host with the toolchain from `scripts/setup_toolchain.sh` | `scripts/build_firmware.sh` |
@@ -55,6 +62,24 @@ and never touches the code, a page, payload or link change is full, the
 forced full arrives at the bound and any full resets it. In
 `tests/test_remote_display_layout.c` and `tests/test_remote_refresh_policy.c`,
 written and seen to fail (no rule to make the target) before the modules
+existed.
+
+`KE3`: the protocol library's own suite, copied with it (every verb round
+trips, truncated, overlong, unknown verb, unknown field, missing field, wrong
+version, embedded null, bounds at and over the limit, no allocation in the
+parse path), and the session's: HELLO carries version 1, the token and
+`locked=0`; the first record is the acceptance; a later record replaces the
+previous wholly; an error code shows as its wire name; `BAD_VERSION` marks
+the link incompatible; closing the port discards everything including an
+unsent press and clears the payload; a line cut by a disconnection is not
+completed after reconnection; a press is sent only while connected and
+otherwise dropped and counted; every press carries both guard flags true;
+Key1 long sends nothing; the Key1 mapping can only produce a page event for
+any page value; the output queue is bounded and overflow is counted; a lost
+handshake is retried on the interval; malformed input is counted and leaves
+the record alone; the session never allocates; and, owed by KE2, every
+error code the protocol defines renders inside the error band. In
+`tests/test_remote_session.c`, written and seen to fail before the session
 existed.
 
 ## Testing deviations

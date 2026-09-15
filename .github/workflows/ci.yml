@@ -1,8 +1,7 @@
 # Flipper V2 as applied by the Pico specification: every pull request runs
-# the typography scan, the host tests under warnings as errors, the sanitiser
-# build, and the firmware build against the pinned SDK and compiler. The
-# protocol library tests and the short fuzz run join this file in KE3, when
-# the protocol library exists.
+# the typography scan, the protocol checks, the host tests under warnings as
+# errors, the sanitiser build, a short fuzz run, the development peer build,
+# and the firmware build against the pinned SDK and compiler.
 name: ci
 
 on:
@@ -20,6 +19,8 @@ jobs:
         with:
           python-version: "3.12"
       - run: python3 scripts/check_typography.py
+      - run: python3 scripts/generate_protocol_tables.py --check
+      - run: python3 scripts/check_protocol_definition.py
 
   host-tests:
     name: host tests and sanitiser build
@@ -29,6 +30,8 @@ jobs:
       - run: gcc --version
       - run: make test
       - run: make test-sanitise
+      - run: make fuzz-sanitise FUZZ_ITERATIONS=200000
+      - run: make peer
 
   firmware-build:
     name: firmware build against the pinned SDK
@@ -36,10 +39,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: sudo apt-get update && sudo apt-get install -y cmake ninja-build
-      # The same script the development machine runs: it downloads the pinned
-      # compiler, verifies Arm's digest, and clones the pinned SDK.
-      - run: scripts/setup_toolchain.sh
-      - run: scripts/build_firmware.sh
+      # The same scripts the development machine runs: the first downloads the
+      # pinned compiler, verifies Arm's digest, and clones the pinned SDK.
+      # Invoked through bash because the repository is edited on Windows, where
+      # git records no executable bit.
+      - run: bash scripts/setup_toolchain.sh
+      - run: bash scripts/build_firmware.sh
       - uses: actions/upload-artifact@v4
         with:
           name: firmware

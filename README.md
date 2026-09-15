@@ -22,7 +22,8 @@ the V2 panel driver, both keys, short and long). `KE2` (layouts and the
 refresh policy) is done and its gate cleared the same day: every state
 judged on the panel, partial refresh about 480 ms with the code still, full
 about 1580 ms, no residue. `KE3` (protocol library, session, development
-peer) is next. Nothing in this repository claims a hardware gate
+peer) is done: the device speaks protocol version 1 on the host, against the
+development peer. Nothing has yet carried it over USB; that is `KE4`. Nothing in this repository claims a hardware gate
 has passed except where that document records the author saying so.
 
 The Wi-Fi radio is unused. A network transport is a later phase (spec Part 9).
@@ -48,11 +49,11 @@ committed), verifies Arm's published digest, and finds or clones the SDK at
 the pinned commit.
 
 ```bash
-scripts/setup_toolchain.sh
+bash scripts/setup_toolchain.sh
 ```
 
 ```bash
-scripts/build_firmware.sh
+bash scripts/build_firmware.sh
 ```
 
 The result is `dist/stopbath_pico_first_light.uf2` (KE1, the panel and key
@@ -80,6 +81,13 @@ MinGW `gcc` on Windows does not ship. Run it under WSL or on Linux:
 make test-sanitise
 ```
 
+The protocol checks: the generated tables against `protocol.json`, and
+`protocol.json` against the appliance's frozen definition:
+
+```bash
+make check-protocol-tables check-protocol-definition PYTHON="py -3"
+```
+
 The typography scan required by Flipper 0.8:
 
 ```bash
@@ -93,6 +101,10 @@ make check-typography PYTHON="py -3"
 | `firmware/` | the pico-sdk facing application, kept thin: the two programs, the hardware layer the vendored driver expects, the non-blocking panel driving, the build |
 | `remote_input/` | pure logic: two keys, debounce, short and long classification, no SDK |
 | `remote_display/` | pure logic: the frame buffer in the panel's packing, a bitmap font, the layout with its regions, the fixtures, the refresh policy, no SDK |
+| `protocol/` | the parser and encoder copied from the Flipper repository with provenance, and the tables generated from `protocol.json` |
+| `session/` | the client session: handshake, replacement, presses to events including the Key1 choice, no SDK |
+| `peer/` | the development peer, copied from the Flipper repository with provenance: a host stand-in for the appliance |
+| `fuzz/` | the protocol parser fuzz harness |
 | `lib/waveshare/` | the vendored panel driver, unmodified, with provenance |
 | `tests/` | host tests and the shared harness |
 | `scripts/` | the typography scan, the toolchain setup and firmware build scripts, the version pin |

@@ -4,10 +4,54 @@ Every unavoidable deviation from the specifications is recorded here with a
 one line justification and a covering test (Flipper 0.11). Each entry states
 the contract, what was done instead, why, and the test that holds it.
 
-Two deviations are already decided by the specification itself and will be
-entered here with their tests when the code that carries them exists in
-`KE3`: the guard flags always true (spec 2.4, `KD5`) and the Key1 mapping
-(spec 2.3, `KD4`). They are listed now so nobody is surprised later.
+## The guard flags are always true
+
+- The contract: Flipper 2.4, which has the peripheral transmit no button
+  event while the screen is locked, the display is off, the application is
+  backgrounded or another application is running, and carry a foregrounded
+  flag and a lock state on the event for the appliance to enforce.
+- What was done instead: every `BUTTON` carries `foregrounded=1` and
+  `unlocked=1`, `HELLO` carries `locked=0`, and `STATE` is never sent
+  (`session/remote_session.c`).
+- Why: both flags are honest. The firmware is single purpose: there is no
+  other application, no background and no desktop, so any press it sees is
+  foregrounded, which is the Flipper's own reasoning for its foregrounded
+  flag. There is no lock (`KD5`, settled 2026-09-15): the lock exists for the
+  pocket case, and a bare Pico carrying a 4.2 inch panel, cabled to the
+  appliance, is not pocketed. Key1 long press is reserved for a lock if the
+  device is ever enclosed or wireless.
+- What this does not weaken: the appliance still enforces the guard on the
+  flags it receives (extension 2.2), so a different or faulty peripheral
+  sending a `0` is rejected. Nothing on the appliance was relaxed
+  (`docs/APPLIANCE_HANDOFF.md` 1.2).
+- Author decision: `KD5`, 2026-09-15.
+- Covering tests: `every press encodes its event with both guard flags true`
+  and `opening the port sends hello with the fixed token and no lock` in
+  `tests/test_remote_session.c`.
+
+## Key1 chooses between the two page events from the last record
+
+- The contract: Flipper 2.1, the ownership principle: the peripheral emits
+  what physically happened and encodes nothing equivalent to a mapping from
+  an event to its meaning.
+- What was done instead: a Key1 short press sends `LEFT_SHORT` when the last
+  `DISPLAY` record named page `GUEST` and `RIGHT_SHORT` otherwise
+  (`remote_session_page_event_for_key1`, the one place it lives).
+- Why: the appliance's page events are absolute (`LEFT_SHORT` is the Wi-Fi
+  page, `RIGHT_SHORT` the gallery page; seam 3.5) and this device has one key
+  to move between them. Choosing from the last record received uses what the
+  device already holds in order to render (Flipper 2.5), not a belief about
+  the session; what it encodes is which of two page events is the other one.
+  If the appliance's table ever changed, only page navigation would
+  misbehave: the function can produce nothing but those two events, and a
+  test passes every value from minus eight to fifteen through it to prove
+  that.
+- Author decision: `KD4`, 2026-09-15, for the proving phase; revisited as
+  `KD9` with field evidence (`docs/APPLIANCE_HANDOFF.md` Part 2 lists the
+  ways it may be aligned).
+- Covering tests: `the key1 mapping can only produce a page event` and the
+  Key1 rows of `every press encodes its event with both guard flags true` in
+  `tests/test_remote_session.c`.
 
 ## Waveshare's identifiers are kept in the hardware layer
 
