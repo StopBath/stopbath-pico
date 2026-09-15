@@ -598,6 +598,55 @@ into the StopBath repository's `docs/PICO_REMOTE_HANDOFF.md`.
   with the Pico attached, the panel following to PRESENTING with the code on
   its own. Nothing further is owed for `KE6`.
 
+### What the appliance recorded of this remote
+
+From the StopBath repository's handoff back to this one, 2026-09-15 (branch
+`pico-api` at `f663166`, appliance version 0.0.1; this firmware at
+`d4c12a6`, the KE5 commit `stopbath_pico.uf2` was built from). The
+appliance logs an outbound record only once the kernel reports the bytes
+taken off the wire (`TIOCOUTQ` drained), so its figures are the remote's
+acceptance times:
+
+- the first `HELLO` accepted 5 ms after the port opened; the READY
+  acceptance taken in 5 ms;
+- session records (126 and 130 bytes) taken in 45 to 120 ms, the slower
+  figures during a full panel refresh (the SPI transfer of the frame, which
+  blocks the loop for that long, not the link);
+- page and count records taken in about 5 ms; `GUEST_CONNECTED` reached the
+  remote 5 ms after the guest was authorised;
+- after the mid session cable pull, the 130 byte record after reconnection
+  was taken in 102 ms and acted on first time, with no retry `HELLO`. The
+  appliance notes that the Flipper does not act on the first record after a
+  re-enumeration when it spans more than one 64 byte USB packet, and that
+  this repository's `transport/` and `firmware/usb_link.c` are therefore
+  the working example of the behaviour the Flipper's receive path needs.
+  Nothing to do here; recorded in case that repository asks.
+- No refusal, no drop, no write over a few tens of milliseconds, in five
+  sessions.
+
+Two facts to carry, from the same handoff:
+
+- The identical records the KE6 entry above noted (two or three around a
+  transition) are the appliance publishing a full record on every domain
+  event (extension 3.1) and will stay; the refresh policy's "no change, no
+  refresh" is the right side to absorb them on, and the journal shows it
+  doing so.
+- The appliance drops a link whose peer has not taken a record off the wire
+  within two seconds (reason `peer not draining`), closes the port and
+  reopens it; to this remote that looks like the host closing and reopening,
+  and its `HELLO` is the recovery. The worst acceptance observed was 120 ms,
+  during the frame transfer, so the headroom is an order of magnitude. The
+  figure to keep in view if the panel driving or a future radio stack ever
+  blocks the loop for longer; recorded in `firmware/panel.h`.
+
+The appliance lists this remote as SUPPORTED in its
+`HARDWARE_COMPATIBILITY.md` on the basis of the `KE6` gate, and holds this
+repository's handoff byte for byte as its `docs/PICO_REMOTE_HANDOFF.md`.
+The appliance's own peripheral gates (`PE2`, twenty attach and detach cycles
+with a restart of each side, and the USB draw beside the guest radio,
+extension 5.3) are the appliance's to run and were not run for either
+remote.
+
 ## Decisions still needing the author
 
 See `STOPBATH_PICO_SPEC.md` Part 10. Open at 2026-09-15: `KD8` (layouts, at

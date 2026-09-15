@@ -21,7 +21,14 @@ void panel_initialise(void);
 
 /* Sends the whole frame (remote_bitmap packing) and starts a full refresh.
  * Returns once the bytes are sent; the refresh runs on. Restores the full
- * refresh registers a partial pass changes, so the two can alternate. */
+ * refresh registers a partial pass changes, so the two can alternate.
+ *
+ * The transfer itself blocks the loop: 30000 bytes over SPI with a chip
+ * select toggle per byte, about 100 ms as the appliance measured it (its
+ * journal put a record's acceptance at 120 ms during a full refresh, 5 ms
+ * otherwise). The appliance drops a link whose peer has not taken a record
+ * within two seconds, so this is the one place the loop may stall and the
+ * figure it must stay well under (evaluation log, KE6). */
 void panel_begin_full_refresh(const uint8_t* frame);
 
 /* Sends one rectangle of the frame and starts a partial refresh of it. The
