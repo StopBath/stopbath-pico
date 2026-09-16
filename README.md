@@ -1,5 +1,14 @@
 # StopBath Pico Remote
 
+## Retired
+
+This repository is retired. Its history and every file in it were imported into
+https://github.com/StopBath/stopbath-peripheral under `pico/` at commit
+`8514e4e80a2e1792c17de7ac7954d5336b3ba203`, from this repository's commit
+`641b869c2cb0aa5c9a436455e9131845075f65ac`, with `git log --follow` intact.
+Development continues there. Nothing here will be merged, no tag here will
+move, and this repository is archived read only.
+
 A Raspberry Pi Pico 2 W with a Waveshare 4.2 inch e-paper module, acting as a
 physical control surface for a StopBath appliance: present the join code,
 start a session, end it, without a phone in the photographer's hand, and with
